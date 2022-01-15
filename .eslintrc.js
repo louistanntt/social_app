@@ -1,3 +1,7 @@
+// 0 | 'off'
+// 1 | 'warning'
+// 2 | 'error'
+
 module.exports = {
   root: true,
   extends: '@react-native-community',
@@ -6,6 +10,6 @@ module.exports = {
   rules: {
     'no-shadow': 'off',
     '@typescript-eslint/no-shadow': ['error'],
-    'no-loops/no-loops': 'warning',
+    'no-unused-vars': 'warning',
   },
 };
