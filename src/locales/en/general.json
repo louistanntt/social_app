@@ -1,0 +1,11 @@
+{
+  "darkMode": "Dark mode",
+  "darkModeDesc": "Toggle between Dark/Light mode",
+  "language": "Language",
+  "login": "Login",
+  "password": "Password",
+  "forgotPassword": "Forgot password ?",
+  "signUp": "Sign up",
+  "dontHaveAccount": "Don't have an account ?",
+  "alreadyHaveAccount": "Already have an account ?"
+}

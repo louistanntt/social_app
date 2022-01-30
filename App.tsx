@@ -1,14 +1,4 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * Generated with the TypeScript template
- * https://github.com/react-native-community/react-native-template-typescript
- *
- * @format
- */
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -17,8 +7,9 @@ import {
   Text,
   useColorScheme,
   View,
+  Appearance,
+  ColorSchemeName,
 } from 'react-native';
-
 import {
   Colors,
   DebugInstructions,
@@ -26,70 +17,60 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+import { Provider, useDispatch } from 'react-redux';
+import store from './src/redux/store';
+import Root from './Root';
+// import { initializeI18n } from './src/locales/i18n';
+import LoadingScreen from './src/screens/LoadingScreen';
+import settingsAction from './src/redux/slices/settingsSlice';
 
-const Section: React.FC<{
-  title: string;
-}> = ({children, title}) => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
+import i18next from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import { config } from './src/config/general';
+import { commonEn, generalEn, errorEn, successEn } from './src/locales/en/index';
+import { commonVi, generalVi, errorVi, successVi } from './src/locales/vi/index';
 
 const App = () => {
-  const isDarkMode = useColorScheme() === 'dark';
+  const [theme, setTheme] = useState<ColorSchemeName>(Appearance.getColorScheme());
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+  Appearance.addChangeListener(scheme => {
+    setTheme(scheme.colorScheme);
+  });
 
+  const [isRendering, setIsRendering] = useState<boolean>(true);
+
+  useEffect(() => {
+    (async () => {
+      await i18next.use(initReactI18next).init({
+        compatibilityJSON: 'v3',
+        lng: config.defaultLang,
+        debug: __DEV__,
+        resources: {
+          en: {
+            common: commonEn,
+            general: generalEn,
+            success: successEn,
+            error: errorEn,
+          },
+          vi: {
+            common: commonVi,
+            general: generalVi,
+            success: successVi,
+            error: errorVi,
+          },
+        },
+      });
+      setIsRendering(false);
+    })();
+  }, []);
+
+  if (isRendering) {
+    return <LoadingScreen />;
+  }
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <Provider store={store}>
+      <Root theme={theme} />
+    </Provider>
   );
 };
 
