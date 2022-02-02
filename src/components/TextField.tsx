@@ -1,6 +1,7 @@
 import React, { memo, useState } from 'react';
 import { TextInput, StyleSheet, KeyboardTypeOptions, StyleProp, TextStyle } from 'react-native';
 import { scale, moderateScale, verticalScale } from '../utilities/functions/scaling';
+import { useAppSelector } from '../utilities/functions/common';
 import colors from '../config/colors';
 
 type TextFieldType = {
@@ -33,6 +34,7 @@ const TextField = (props: TextFieldType) => {
   } = props;
 
   const [onFocusState, setOnFocusState] = useState<boolean>(false);
+  const mode = useAppSelector(state => state.settings.mode);
 
   return (
     <TextInput
@@ -42,13 +44,21 @@ const TextField = (props: TextFieldType) => {
         styles.container,
         style,
         {
-          borderColor: onFocusState ? colors.primary : colors.lightGray,
+          borderColor: onFocusState
+            ? colors.primary
+            : mode === 'light'
+            ? colors.lightGray
+            : colors.darkGray,
           borderWidth: 1,
-          backgroundColor: editable ? colors.secondary : 'transparent',
+          backgroundColor: editable
+            ? mode === 'light'
+              ? colors.lightSecondary
+              : colors.darkSecondary
+            : 'transparent',
           color: editable ? colors.gray : colors.white,
         },
       ]}
-      placeholderTextColor={colors.gray}
+      placeholderTextColor={mode === 'light' ? colors.textGray : colors.white}
       placeholder={placeHolder}
       onChangeText={onChangeText}
       secureTextEntry={secureTextEntry}

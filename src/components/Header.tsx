@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     height: 50,
     backgroundColor: 'transparent',
     borderBottomWidth: 3,
-    borderBottomColor: colors.test,
+    borderBottomColor: colors.white,
     flexDirection: 'row',
     alignItems: 'center',
   },

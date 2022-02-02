@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import configInstance from '../config/environment';
+import configInstance from '../../config/environment';
 
 export const saveToken = async(token: string) => {
     configInstance.accessToken = token;

@@ -1,8 +1,8 @@
 import request from '../../service/axiosService';
 import { LoginProps } from '../../shared/type';
 
-const URL_LOGIN = "/auth/login";
-const URL_LOGOUT = "/logout";
+const URL_LOGIN = "api/auth/login";
+const URL_LOGOUT = "api/logout";
 
 export function loginAPI(data: LoginProps){
     return request({

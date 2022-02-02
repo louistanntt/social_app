@@ -4,11 +4,11 @@ export type  LoginProps = {
     remember_me: boolean;
 };
 
-export type SignUpProps = Omit<LoginProps, "remember_me"> & {
-    // confirm: string;
-    phone: string; 
-    first_name: string;
-    last_name: string;
+export type RegisterProps = Omit<LoginProps, "remember_me"> & {
+    confirm: string;
+    // phone: string; 
+    // first_name: string;
+    // last_name: string;
 }
 
 export type ToastProps = {

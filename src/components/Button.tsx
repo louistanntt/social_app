@@ -12,7 +12,7 @@ type ButtonProps = {
 const Button = (props: ButtonProps) => {
   const { onPress, children, style, disable } = props;
   return (
-    <TouchableOpacity disabled={disable} style={[style]} onPress={onPress}>
+    <TouchableOpacity disabled={disable} style={[style]} onPress={onPress} activeOpacity={0.6}>
       {children}
     </TouchableOpacity>
   );

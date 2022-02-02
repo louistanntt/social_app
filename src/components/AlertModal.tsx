@@ -15,6 +15,7 @@ type AlertModalProps = {
   type?: 'error' | 'danger' | 'info' | 'warning' | 'success';
   children?: any;
   modalRef?: any;
+  onOkPress?: () => void;
 };
 
 const AlertModal = (props: AlertModalProps) => {
@@ -27,6 +28,7 @@ const AlertModal = (props: AlertModalProps) => {
     text,
     type = 'success',
     modalRef,
+    onOkPress,
   } = props;
   const { windowWidth } = useDeviceInfo();
 
@@ -71,7 +73,16 @@ const AlertModal = (props: AlertModalProps) => {
               <Text style={styles.title}>{title}</Text>
               <Text style={styles.text}>{text}</Text>
             </View>
-            <ButtonFill text={buttonText} onPress={() => setVisible(false)} />
+            <ButtonFill
+              text={buttonText}
+              onPress={() => {
+                if (onOkPress) {
+                  onOkPress();
+                } else {
+                  setVisible(false);
+                }
+              }}
+            />
             {children}
           </View>
         </View>
