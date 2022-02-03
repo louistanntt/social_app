@@ -30,9 +30,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = props => {
   });
 
   const onRegister = async () => {
-    if (!user.email || !user.password || !user.confirm) {
-      toast(t('validateUser'), 'error');
-    } else if (user.password !== user.confirm) {
+    if (user.password !== user.confirm) {
       toast(t('passwordNotMatch'), 'error');
     } else {
       // const res = await registerAPI(user);
@@ -106,17 +104,22 @@ const RegisterScreen: React.FC<RegisterScreenProps> = props => {
                 alignItems: 'center',
               }}
             >
-              <Button onPress={() => console.log('forget')}>
-                <Text style={mode === 'light' ? lightMode.text : darkMode.text}>
+              <Button
+                title={t('forgotPassword')}
+                titleStyle={mode === 'light' ? lightMode.text : darkMode.text}
+                onPress={() => console.log('forget')}
+              />
+              {/* <Text style={mode === 'light' ? lightMode.text : darkMode.text}>
                   {t('forgotPassword')}
-                </Text>
-              </Button>
+                </Text> */}
+              {/* </Button> */}
             </View>
 
             <ButtonFill
               text={t('next').toString()}
               onPress={() => onRegister()}
               style={{ marginTop: verticalScale(45), marginBottom: verticalScale(20) }}
+              disabled={!user.email || !user.password || !user.confirm}
             />
           </View>
           <View

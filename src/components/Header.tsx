@@ -1,6 +1,12 @@
 import React, { memo } from 'react';
-import { StyleSheet, View, StyleProp, ViewStyle } from 'react-native';
+import { StyleSheet, View, StyleProp, ViewStyle, Text } from 'react-native';
 import colors from '../config/colors';
+import { Button } from './index';
+import { EnIcon } from './Icons';
+import { goBack } from '../service/navigationService';
+import { scale } from '../utilities/functions/scaling';
+import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 type HeaderProps = {
   leftComponent?: React.ReactNode;
@@ -22,6 +28,8 @@ const Header = (props: HeaderProps) => {
     rightContainerStyle,
     style,
   } = props;
+
+  const { t } = useTranslation('general');
   return (
     <View style={[styles.header, style]}>
       <View
@@ -31,7 +39,24 @@ const Header = (props: HeaderProps) => {
           leftContainerStyle,
         ]}
       >
-        {leftComponent && leftComponent}
+        {leftComponent ? (
+          leftComponent
+        ) : (
+          <Button onPress={() => goBack()}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+                paddingHorizontal: scale(5),
+                // backgroundColor: 'red',
+              }}
+            >
+              <EnIcon name="chevron-thin-left" size={20} />
+              <Text style={{ fontSize: 16, marginLeft: scale(5) }}>{t('goBack')}</Text>
+            </View>
+          </Button>
+        )}
       </View>
       <View
         style={[

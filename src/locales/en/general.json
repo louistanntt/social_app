@@ -18,5 +18,11 @@
   "accountInactivate": "Account Inactivate",
   "activateMessage": "Account has not been activated. Please click on the button to continue.",
   "validateUser": "All field are required",
-  "passwordNotMatch": "Password does not match"
+  "passwordNotMatch": "Password does not match",
+  "goBack": "Go back",
+  "sentCodeMessage": "The activate code is sent to",
+  "pleaseCheck": "Please check",
+  "empty": "Empty",
+  "validIn": "Valid in",
+  "minutes": "Minutes"
 }

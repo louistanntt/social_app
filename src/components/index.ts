@@ -11,6 +11,4 @@ import ToastCustom from './ToastCustom';
 import Header from './Header';
 
 
-export  { AlertModal, BottomSheet, Button, ButtonFill, CheckBox, KeyboardView, TextField, ToastCustom, Header, TextAdvance
-    // , Toast, 
-}
+export  { AlertModal, BottomSheet, Button, ButtonFill, CheckBox, KeyboardView, TextField, ToastCustom, Header, TextAdvance, Toast }

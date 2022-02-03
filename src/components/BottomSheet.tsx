@@ -1,107 +1,126 @@
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { View, Modal, StyleProp, ViewStyle } from 'react-native';
-import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
+import React, { memo, SetStateAction, useEffect, useState } from 'react';
+import { StyleSheet, View, Text, StyleProp, ViewStyle } from 'react-native';
 import Animated, {
+  useAnimatedGestureHandler,
   useSharedValue,
-  withTiming,
-  useDerivedValue,
-  runOnJS,
   useAnimatedStyle,
-  interpolateColor,
-  interpolate,
+  withSpring,
 } from 'react-native-reanimated';
-import { scale, verticalScale, moderateScale } from '../utilities/functions/scaling';
+import { PanGestureHandler } from 'react-native-gesture-handler';
+import useDeviceInfo from '../utilities/hooks/useDeviceInfo';
 import colors from '../config/colors';
-import { StyleSheet } from 'react-native';
+import { Button } from '.';
+
+type Context = {
+  startTop?: number;
+};
 
 type BottomSheetProps = {
   show: boolean;
-  setShow: Dispatch<SetStateAction<boolean>>;
   children?: any;
-  height?: number;
+  style?: StyleProp<ViewStyle>;
+  topOffSet?: number;
+  onOpen?: (e?: any) => void;
+  onClose?: (e?: any) => void;
+  setShow?: React.Dispatch<SetStateAction<boolean>>;
 };
 
 const BottomSheet = (props: BottomSheetProps) => {
-  const { children, show, setShow, height } = props;
-  const [visible, setVisible] = useState(false);
-  const showAnim = useSharedValue(0);
-  const onShow = () => {
-    showAnim.value = withTiming(0, { duration: 500 });
-    setVisible(true);
-  };
-  const onHide = () => {
-    (showAnim.value = withTiming(500)), { duration: 300 };
-  };
-
-  const recordResult = (result: number) => {
-    if (result == 500) setVisible(false);
-    // if (result == 1) setVisible(true);
+  const { show, children, style, topOffSet, onOpen, onClose, setShow } = props;
+  const { windowWidth, windowHeight, statusBarHeight } = useDeviceInfo(true);
+  const top = useSharedValue(topOffSet ? topOffSet : windowHeight);
+  const SPRING_CONFIG = {
+    damping: 80,
+    overshootClamping: true,
+    restDisplacementThreshold: 0.1,
+    restSpeedThreshold: 0.1,
+    stiffness: 500,
   };
 
-  useDerivedValue(() => {
-    runOnJS(recordResult)(showAnim.value);
-  });
   useEffect(() => {
-    console.log(show);
-    show ? onShow() : onHide();
+    show ? onOpenSheet() : onCloseSheet();
   }, [show]);
-  const modalStyle = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(showAnim.value, [0, 500], ['#00000060', '#00000000']),
-  }));
-  const translateY = useAnimatedStyle(() => ({
-    transform: [{ translateY: showAnim.value }],
-  }));
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return { top: withSpring(top.value, SPRING_CONFIG) };
+  });
+
+  const gestureHandler = useAnimatedGestureHandler({
+    onStart(_, context: Context) {
+      context.startTop = top.value;
+    },
+    onActive(event, context: Context) {
+      top.value = context.startTop + event.translationY;
+    },
+    onEnd() {
+      // if (top.value < windowHeight / 3 - 100) {
+      //   top.value = windowHeight / 3;
+      // }
+
+      if (top.value < windowHeight / 4) {
+        return (top.value = statusBarHeight);
+      }
+      // if (top.value > windowHeight / 2 && top.value < (windowHeight * 3) / 4) {
+      //   return (top.value = windowHeight / 1.2);
+      // }
+      if (top.value > windowHeight / 2 + 200) {
+        top.value = windowHeight;
+      } else {
+        return (top.value = windowHeight / 2);
+      }
+    },
+  });
+
+  const onOpenSheet = async () => {
+    if (onOpen) {
+      await onOpen();
+    }
+    top.value = withSpring(topOffSet ? topOffSet : windowHeight / 1.2, SPRING_CONFIG);
+  };
+
+  const onCloseSheet = async () => {
+    if (onClose) {
+      await onClose();
+    }
+    top.value = withSpring(windowHeight, SPRING_CONFIG);
+  };
+
   return (
-    <Modal visible={visible} transparent statusBarTranslucent onRequestClose={() => setShow(false)}>
-      <Animated.View style={[modalStyle, styles.container]}>
-        <View
-          style={styles.close}
-          onTouchEnd={() => {
-            setShow(false);
-          }}
-        />
-        <Animated.View style={[translateY, styles.content, { height: height }]}>
-          {/* <View style={styles.activeBar} /> */}
-          {children}
+    <>
+      <PanGestureHandler onGestureEvent={gestureHandler}>
+        <Animated.View
+          style={[
+            {
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: colors.white,
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
+              shadowColor: '#000',
+              shadowOffset: {
+                width: 0,
+                height: 2,
+              },
+              shadowOpacity: 0.25,
+              shadowRadius: 3.84,
+              elevation: 5,
+              padding: 20,
+            },
+            animatedStyle,
+            style,
+          ]}
+        >
+          {children || <Text>Sheet</Text>}
         </Animated.View>
-      </Animated.View>
-    </Modal>
+      </PanGestureHandler>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-  },
-  content: {
-    backgroundColor: colors.white,
-    width: '100%',
-    minHeight: verticalScale(100),
-    borderTopLeftRadius: moderateScale(10),
-    borderTopRightRadius: moderateScale(10),
-    borderColor: colors.textGray,
-    borderWidth: moderateScale(2),
-    padding: scale(10),
-  },
-  activeBar: {
-    position: 'absolute',
-    alignSelf: 'center',
-    top: verticalScale(-20),
-    width: scale(50),
-    height: verticalScale(8),
-    backgroundColor: colors.primary,
-    borderRadius: moderateScale(10),
-    marginBottom: verticalScale(10),
-  },
-  close: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'transparent',
-  },
+  container: { justifyContent: 'center', alignItems: 'center', flex: 1 },
 });
 
-export default BottomSheet;
+export default memo(BottomSheet);

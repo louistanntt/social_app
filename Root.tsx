@@ -86,7 +86,7 @@ const Root: React.FC<RootProps> = props => {
     <View style={{ flex: 1 }}>
       <NavigationContainer ref={navigationRef}>
         <RootStack.Navigator screenOptions={{ headerShown: false }}>
-          <RootStack.Screen name="Auth" component={AuthRoute} />
+          {/* <RootStack.Screen name="Auth" component={AuthRoute} /> */}
           <RootStack.Screen name="Main" component={MainRoute} />
         </RootStack.Navigator>
       </NavigationContainer>

@@ -4,10 +4,11 @@ import colors from '../../../config/colors';
 import { moderateScale, verticalScale, scale } from '../../../utilities/functions/scaling';
 import useDeviceInfo from '../../../utilities/hooks/useDeviceInfo';
 import { Button, ButtonFill, Header } from '../../../components';
-import { IoIcon } from '../../../components/Icons';
+import { IoIcon, EnIcon } from '../../../components/Icons';
 import { useAppSelector } from '../../../utilities/functions/common';
 import { darkMode, lightMode } from './styles';
 import { useTranslation } from 'react-i18next';
+import useInterval from '../../../utilities/hooks/useInterval';
 
 interface ActivateScreenProps {
   route: any;
@@ -19,14 +20,19 @@ const ActivateScreen: React.FC<ActivateScreenProps> = props => {
   const { statusBarHeight, windowWidth, windowHeight } = useDeviceInfo(true);
   const mode = useAppSelector(state => state.settings.mode);
 
-  // let minute = 1000 * 60;
+  const [isRunning, setIsRunning] = useState<boolean>(true);
+  const [count, setCount] = useState<number>(10);
+  const delay = 1000;
 
-  // setInterval(() => {
-  //   minute--;
-  //   if (minute <= 0) {
-  //     // lam gi thi lam
-  //   }
-  // }, 1000);
+  useInterval(
+    () => {
+      if (count === 1) {
+        setIsRunning(false);
+      }
+      setCount(count - 1);
+    },
+    isRunning ? delay : null,
+  );
 
   const { t, i18n } = useTranslation('general');
 
@@ -86,7 +92,7 @@ const ActivateScreen: React.FC<ActivateScreenProps> = props => {
                     mode === 'light' ? lightMode.textNumber : darkMode.textNumber,
                   ]}
                 >
-                  Empty
+                  {t('empty')}
                 </Text>
               ) : item.action === 'delete' ? (
                 <IoIcon
@@ -115,22 +121,26 @@ const ActivateScreen: React.FC<ActivateScreenProps> = props => {
 
   return (
     <View style={[mode === 'light' ? lightMode.container : darkMode.container]}>
-      <Header />
       {/* <View style={{ flex: 1, paddingTop: statusBarHeight }}> */}
       <View style={mode === 'light' ? lightMode.pinContent : darkMode.pinContent}>
+        <Header />
         <View style={styles.blockText}>
           <Text style={mode === 'light' ? lightMode.text : darkMode.text}>
-            The activate code is sent to{' '}
+            {t('sentCodeMessage')}{' '}
           </Text>
           <Text
             style={[mode === 'light' ? lightMode.text : darkMode.text, { color: colors.primary }]}
           >
             {route.params?.email}@gmail.com
           </Text>
-          <Text style={mode === 'light' ? lightMode.text : darkMode.text}>. Please check!</Text>
+          <Text style={mode === 'light' ? lightMode.text : darkMode.text}>
+            . {t('pleaseCheck')}!
+          </Text>
         </View>
         <View style={{ marginTop: 5 }}>
-          <Text style={mode === 'light' ? lightMode.text : darkMode.text}>Valid in 2 minutes</Text>
+          <Text style={mode === 'light' ? lightMode.text : darkMode.text}>
+            {t('validIn')} 2 {t('minutes').toLowerCase()}
+          </Text>
         </View>
         <View style={styles.blockPinBox}>
           <View style={mode === 'light' ? lightMode.pinBox : darkMode.pinBox}>
@@ -204,7 +214,11 @@ const ActivateScreen: React.FC<ActivateScreenProps> = props => {
               borderRadius: moderateScale(5),
               justifyContent: 'center',
             }}
-            onPress={() => console.log('a')}
+            disable={isRunning}
+            onPress={() => {
+              setCount(10);
+              setIsRunning(true);
+            }}
           >
             <View style={{ flexDirection: 'column' }}>
               <Text
@@ -215,19 +229,21 @@ const ActivateScreen: React.FC<ActivateScreenProps> = props => {
               >
                 {t('resendCode')}
               </Text>
-              <Text
-                style={[
-                  mode === 'light' ? lightMode.text : darkMode.text,
-                  { color: colors.primary },
-                ]}
-              >
-                (60s)
-              </Text>
+              {isRunning ? (
+                <Text
+                  style={[
+                    mode === 'light' ? lightMode.text : darkMode.text,
+                    { color: colors.primary },
+                  ]}
+                >
+                  ({count}s)
+                </Text>
+              ) : null}
             </View>
           </Button>
           <ButtonFill
             disabled={OTP.length < 6}
-            text="Activate Account"
+            text={t('activate')}
             onPress={() => console.log('2')}
             style={{ width: '45%' }}
           />

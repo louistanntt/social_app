@@ -18,5 +18,11 @@
   "accountInactivate": "Tài khoản chưa kích hoạt",
   "activateMessage": "Tài khoản chưa được kích hoạt. Vui lòng bấm nút để tiếp tục.",
   "validateUser": "Các trường không được trống",
-  "passwordNotMatch": "Mật khẩu không trùng khớp"
+  "passwordNotMatch": "Mật khẩu không trùng khớp",
+  "goBack": "Trở về",
+  "sentCodeMessage": "Mã kích hoạt đã được gửi đến",
+  "pleaseCheck": "Vui lòng kiểm tra",
+  "empty": "Xoá hết",
+  "validIn": "Có thời hạn trong",
+  "minutes": "Phút"
 }
