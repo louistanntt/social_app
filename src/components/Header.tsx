@@ -29,7 +29,7 @@ const Header = (props: HeaderProps) => {
     style,
   } = props;
 
-  const { t } = useTranslation('general');
+  const { t } = useTranslation(['general', 'common']);
   return (
     <View style={[styles.header, style]}>
       <View
@@ -53,7 +53,9 @@ const Header = (props: HeaderProps) => {
               }}
             >
               <EnIcon name="chevron-thin-left" size={20} />
-              <Text style={{ fontSize: 16, marginLeft: scale(5) }}>{t('goBack')}</Text>
+              <Text style={{ fontSize: 16, marginLeft: scale(5) }}>
+                {t('goBack', { ns: 'common' })}
+              </Text>
             </View>
           </Button>
         )}

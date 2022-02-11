@@ -1,32 +1,28 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit'
+import {RegisterProps} from '../../shared/type'
 
-interface UserState {
-    userName: string,
-    phoneNumber: string
-}
-
-type T = {
-    email: string,
-    password: string
-}
+type UserState = Omit<RegisterProps, 'confirm' | 'password'>
 
 const initialState: UserState = {
-    userName: '',
-    phoneNumber: '+84',
+    email: '',
+    phone: '',
+    last_name:'',
+    first_name: '',
+    day_of_birth: '',
 } 
 
 const userSlice = createSlice({
     name: "user",
     initialState,
     reducers: {
-        setUserName(state, action: PayloadAction<T>){},
-        setUserNameSuccess(state, action){}
+        setUserRegister(state, action: PayloadAction<UserState>){},
+        setUserRegisterSuccess(state, action){},
     }
 })
 
 export const {
-    setUserName, 
-    setUserNameSuccess,
+    setUserRegister, 
+    setUserRegisterSuccess,
 } = userSlice.actions
 
 export default userSlice.reducer

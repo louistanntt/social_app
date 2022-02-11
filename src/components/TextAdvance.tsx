@@ -19,7 +19,7 @@ import { IoIcon } from './Icons';
 
 interface TextAdvanceProps extends TextInputProps {
   value: string;
-  defaultValue?: string;
+  defaultValue?: string | undefined;
   style?: StyleProp<TextStyle>;
   label?: string;
   secureTextEntry?: any;

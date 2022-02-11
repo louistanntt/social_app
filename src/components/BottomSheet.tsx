@@ -45,6 +45,21 @@ const BottomSheet = (props: BottomSheetProps) => {
     return { top: withSpring(top.value, SPRING_CONFIG) };
   });
 
+  const onOpenSheet = async () => {
+    if (onOpen) {
+      await onOpen();
+    }
+    top.value = withSpring(topOffSet ? topOffSet : windowHeight / 1.2, SPRING_CONFIG);
+  };
+
+  const onCloseSheet = async () => {
+    console.log('ok');
+    if (onClose) {
+      await onClose();
+    }
+    top.value = withSpring(windowHeight, SPRING_CONFIG);
+  };
+
   const gestureHandler = useAnimatedGestureHandler({
     onStart(_, context: Context) {
       context.startTop = top.value;
@@ -57,33 +72,28 @@ const BottomSheet = (props: BottomSheetProps) => {
       //   top.value = windowHeight / 3;
       // }
 
-      if (top.value < windowHeight / 4) {
-        return (top.value = statusBarHeight);
+      console.log(top.value);
+      console.log(windowHeight);
+
+      if (top.value > windowHeight - 50) {
+        ('worklet');
+        return onCloseSheet();
       }
+
+      // if (top.value < windowHeight / 4) {
+      //   return (top.value = statusBarHeight);
+      // }
       // if (top.value > windowHeight / 2 && top.value < (windowHeight * 3) / 4) {
       //   return (top.value = windowHeight / 1.2);
       // }
-      if (top.value > windowHeight / 2 + 200) {
-        top.value = windowHeight;
-      } else {
-        return (top.value = windowHeight / 2);
-      }
+
+      // if (top.value > windowHeight / 2 + 200) {
+      //   top.value = windowHeight;
+      // } else {
+      //   return (top.value = windowHeight / 2);
+      // }
     },
   });
-
-  const onOpenSheet = async () => {
-    if (onOpen) {
-      await onOpen();
-    }
-    top.value = withSpring(topOffSet ? topOffSet : windowHeight / 1.2, SPRING_CONFIG);
-  };
-
-  const onCloseSheet = async () => {
-    if (onClose) {
-      await onClose();
-    }
-    top.value = withSpring(windowHeight, SPRING_CONFIG);
-  };
 
   return (
     <>

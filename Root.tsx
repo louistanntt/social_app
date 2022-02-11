@@ -7,16 +7,10 @@ import AuthRoute from './src/routes/AuthRoute';
 import MainRoute from './src/routes/MainRoute';
 import { useAppSelector } from './src/utilities/functions/common';
 import { useDispatch } from 'react-redux';
-import { setMode, setLanguage } from './src/redux/slices/settingsSlice';
+import { setMode, setLanguage, setToken, setRemember } from './src/redux/slices/settingsSlice';
 import LoadingScreen from './src/screens/LoadingScreen';
-import settingsAction from './src/redux/slices/settingsSlice';
-import i18next from 'i18next';
-import { initReactI18next } from 'react-i18next';
 import { config } from './src/config/general';
-import { commonEn, generalEn, errorEn, successEn } from './src/locales/en/index';
-import { commonVi, generalVi, errorVi, successVi } from './src/locales/vi/index';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Toast from 'react-native-toast-message';
 import ToastCustom from './src/components/ToastCustom';
 const RootStack = createNativeStackNavigator();
 
@@ -26,6 +20,8 @@ const Root: React.FC<RootProps> = props => {
   const {} = props;
   const dispatch = useDispatch();
   const settings = useAppSelector(state => state.settings);
+  const isLoggedIn = useAppSelector(state => state.settings.token);
+  const isRemember = useAppSelector(state => state.settings.remember);
 
   const [theme, setTheme] = useState<ColorSchemeName>(Appearance.getColorScheme());
   const [isRendering, setIsRendering] = useState<boolean>(true);
@@ -48,46 +44,48 @@ const Root: React.FC<RootProps> = props => {
     } catch (error) {
       console.log(error);
     }
-  }, [settings]);
+  }, []);
 
-  useEffect(() => {
-    getUserSettings();
+  const getUserToken = useCallback(async () => {
+    try {
+      let accessToken = await AsyncStorage.getItem('token');
+      let remembered = await AsyncStorage.getItem('remember');
+      if (accessToken) {
+        dispatch(setToken(accessToken));
+      }
+      if (remembered) {
+        dispatch(setRemember(JSON.parse(remembered)));
+      }
+      setIsRendering(false);
+    } catch (error) {
+      console.log(error);
+    }
   }, []);
 
   useEffect(() => {
-    (async () => {
-      await i18next.use(initReactI18next).init({
-        compatibilityJSON: 'v3',
-        lng: settings?.language,
-        debug: __DEV__,
-        resources: {
-          vi: {
-            common: commonVi,
-            general: generalVi,
-            success: successVi,
-            error: errorVi,
-          },
-          en: {
-            common: commonEn,
-            general: generalEn,
-            success: successEn,
-            error: errorEn,
-          },
-        },
-      });
-      setIsRendering(false);
-    })();
+    getUserSettings();
+    getUserToken();
   }, []);
 
   if (isRendering) {
     return <LoadingScreen />;
   }
+
   return (
     <View style={{ flex: 1 }}>
       <NavigationContainer ref={navigationRef}>
         <RootStack.Navigator screenOptions={{ headerShown: false }}>
-          {/* <RootStack.Screen name="Auth" component={AuthRoute} /> */}
-          <RootStack.Screen name="Main" component={MainRoute} />
+          {isLoggedIn && isRemember ? (
+            <>
+              <RootStack.Screen name="Main" component={MainRoute} />
+              <RootStack.Screen name="Auth" component={AuthRoute} />
+            </>
+          ) : (
+            <>
+              <RootStack.Screen name="Auth" component={AuthRoute} />
+              <RootStack.Screen name="Main" component={MainRoute} />
+            </>
+          )}
         </RootStack.Navigator>
       </NavigationContainer>
       <ToastCustom />

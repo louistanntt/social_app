@@ -43,7 +43,7 @@ const KeyboardView = (props: KeyboardViewProps) => {
       keyboardShouldPersistTaps="handled"
       contentContainerStyle={{
         width: windowWidth,
-        paddingHorizontal: scale(10),
+        // paddingHorizontal: scale(10),
         height: isHeader ? windowHeight - verticalScale(80) : windowHeight,
       }}
       scrollEnabled={false}

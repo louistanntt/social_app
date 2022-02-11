@@ -10,3 +10,7 @@ export const removeToken = async () => {
     configInstance.accessToken = '';
     await AsyncStorage.removeItem('token')
 }
+
+export const saveRemember = async(value: boolean) => {
+    await AsyncStorage.setItem('remember', JSON.stringify(value));
+}

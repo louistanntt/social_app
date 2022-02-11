@@ -8,7 +8,8 @@ declare module 'axios' {
   }
 }
 
-const API_URL = 'http://192.168.1.34:3000'
+// const API_URL = 'http://192.168.1.34:3000';
+const API_URL = 'http://localhost:3000'
 
 const instance = axios.create({
   // baseURL: configInstance.API_URL,
@@ -47,7 +48,7 @@ instance.interceptors.request.use((config: AxiosRequestConfig) => {
         // authentication (token related issues)
         case 401: {
           // return Promise.reject(new APIError(err.message, 409));
-          return Promise.reject(error.message);
+          return Promise.reject(error);
         }
   
         // forbidden (permission related issues)

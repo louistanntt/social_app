@@ -9,14 +9,15 @@ import { useAppSelector } from '../../../utilities/functions/common';
 import { darkMode, lightMode } from './styles';
 import { useTranslation } from 'react-i18next';
 import useInterval from '../../../utilities/hooks/useInterval';
+import { requestCodeAPI } from '../../../api/authentication';
 
 interface ActivateScreenProps {
   route: any;
   navigation: any;
 }
 
-const ActivateScreen: React.FC<ActivateScreenProps> = props => {
-  const { route, navigation } = props;
+const ActivateScreen: React.FC<ActivateScreenProps> = ({ route, navigation }) => {
+  const userParams = route.params?.email;
   const { statusBarHeight, windowWidth, windowHeight } = useDeviceInfo(true);
   const mode = useAppSelector(state => state.settings.mode);
 
@@ -34,11 +35,9 @@ const ActivateScreen: React.FC<ActivateScreenProps> = props => {
     isRunning ? delay : null,
   );
 
-  const { t, i18n } = useTranslation('general');
+  const { t } = useTranslation(['general', 'common']);
 
   const [OTP, setOTP] = useState<Array<string>>([]);
-
-  console.log(OTP);
 
   const _renderNumericKeyPad = () => {
     const numericKeyPad = [
@@ -92,7 +91,7 @@ const ActivateScreen: React.FC<ActivateScreenProps> = props => {
                     mode === 'light' ? lightMode.textNumber : darkMode.textNumber,
                   ]}
                 >
-                  {t('empty')}
+                  {t('empty', { ns: 'common' })}
                 </Text>
               ) : item.action === 'delete' ? (
                 <IoIcon
@@ -119,6 +118,17 @@ const ActivateScreen: React.FC<ActivateScreenProps> = props => {
     );
   };
 
+  console.log(userParams);
+
+  const onResendCode = async () => {
+    if (userParams) {
+      const res = await requestCodeAPI({ email: userParams });
+      console.log(res);
+    } else {
+      console.log('ko');
+    }
+  };
+
   return (
     <View style={[mode === 'light' ? lightMode.container : darkMode.container]}>
       {/* <View style={{ flex: 1, paddingTop: statusBarHeight }}> */}
@@ -131,11 +141,9 @@ const ActivateScreen: React.FC<ActivateScreenProps> = props => {
           <Text
             style={[mode === 'light' ? lightMode.text : darkMode.text, { color: colors.primary }]}
           >
-            {route.params?.email}@gmail.com
+            {route.params?.email}.{' '}
           </Text>
-          <Text style={mode === 'light' ? lightMode.text : darkMode.text}>
-            . {t('pleaseCheck')}!
-          </Text>
+          <Text style={mode === 'light' ? lightMode.text : darkMode.text}>{t('pleaseCheck')}!</Text>
         </View>
         <View style={{ marginTop: 5 }}>
           <Text style={mode === 'light' ? lightMode.text : darkMode.text}>
@@ -218,6 +226,7 @@ const ActivateScreen: React.FC<ActivateScreenProps> = props => {
             onPress={() => {
               setCount(10);
               setIsRunning(true);
+              onResendCode();
             }}
           >
             <View style={{ flexDirection: 'column' }}>
@@ -243,7 +252,7 @@ const ActivateScreen: React.FC<ActivateScreenProps> = props => {
           </Button>
           <ButtonFill
             disabled={OTP.length < 6}
-            text={t('activate')}
+            text={t('activate', { ns: 'common' })}
             onPress={() => console.log('2')}
             style={{ width: '45%' }}
           />

@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Text,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
+  Alert,
+} from 'react-native';
 import useDeviceInfo from '../../../utilities/hooks/useDeviceInfo';
 import {
   TextField,
@@ -18,11 +26,12 @@ import { useAppDispatch, useAppSelector } from '../../../utilities/functions/com
 import { setLanguage } from '../../../redux/slices/settingsSlice';
 import { useTranslation } from 'react-i18next';
 import { LoginProps } from '../../../shared/type';
-import { loginAPI } from '../../../api/authentication/loginAPI';
+import { loginAPI } from '../../../api/authentication';
 import configInstance from '../../../config/environment';
 import colors from '../../../config/colors';
 import { darkMode, lightMode } from './styles';
-import { saveToken } from '../../../utilities/functions/tokenStorage';
+import { saveToken, saveRemember } from '../../../utilities/functions/tokenStorage';
+import { KeyboardView } from '../../../components/index';
 
 interface LoginScreenProps {}
 
@@ -34,10 +43,10 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
   // const navigation = useNavigation();
   const dispatch = useAppDispatch();
 
-  const { t, i18n } = useTranslation('general');
+  const { t, i18n } = useTranslation(['general', 'common']);
 
   const [user, setUser] = useState<LoginProps>({
-    email: '',
+    email: 'louistanntt',
     password: '',
     remember_me: false,
   });
@@ -53,19 +62,27 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
           email = `${user.email}@gmail.com`;
         }
       }
-      const res = await loginAPI({
-        email: email,
-        password: user.password,
-        remember_me: user.remember_me,
-      });
-      saveToken(res.data.access_token);
-      if (!res.data?.user_info.active) {
-        // navigate('Main');
-        navigate('Activate');
-      } else {
-        setShow(true);
+      try {
+        const res = await loginAPI({
+          email: email,
+          password: user.password,
+          remember_me: user.remember_me,
+        });
+        await saveToken(res.data.access_token);
+        await saveRemember(user.remember_me);
+        navigate('Main');
+      } catch (err: any) {
+        if (err?.response.status === 401) {
+          setShow(true);
+        }
+
+        // navigate('Activate');
       }
     }
+  };
+
+  const onForgotPassword = () => {
+    navigate('Register', { from: 'forgot', item: user });
   };
 
   const onChangeLanguage = (newLanguage: string): void => {
@@ -73,52 +90,15 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
     dispatch(setLanguage(newLanguage));
   };
 
-  const [test, setTest] = useState<string>('');
-
   return (
-    // <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-    //   <ButtonFill text="A" onPress={() => setShow(!show)} />
-
-    // </View>
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={[
-        mode === 'light' ? lightMode.container : darkMode.container,
-        {
-          paddingTop: statusBarHeight,
-        },
-      ]}
-    >
-      <ScrollView contentContainerStyle={{ flex: 1 }}>
+    // <KeyboardView>
+    <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, width: '100%' }}>
         <View style={styles.header}>
           <Text style={{ fontSize: 40, color: colors.primary }}>social</Text>
         </View>
         <View style={styles.footer}>
           <View>
-            {/* <TextField
-              value={user.email}
-              placeHolder={t('email')}
-              isFocus
-              onChangeText={e => {
-                setUser({
-                  ...user,
-                  email: e,
-                });
-              }}
-            />
-            <TextField
-              value={user.password}
-              placeHolder={t('password')}
-              isFocus
-              style={{ marginTop: verticalScale(30) }}
-              onChangeText={e => {
-                setUser({
-                  ...user,
-                  password: e,
-                });
-              }}
-              secureTextEntry={true}
-            /> */}
             <TextAdvance
               // label={t('email')}
               // placeHolder={'example@gmail.com'}
@@ -153,13 +133,12 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
                 setChecked={() => setUser({ ...user, remember_me: !user.remember_me })}
                 label={t('rememberMe')}
               />
-              <Button onPress={() => console.log('forget')}>
+              <Button onPress={() => onForgotPassword()}>
                 <Text style={mode === 'light' ? lightMode.text : darkMode.text}>
                   {t('forgotPassword')}
                 </Text>
               </Button>
             </View>
-
             <ButtonFill
               text={t('login').toString()}
               onPress={() => onLogin()}
@@ -186,22 +165,32 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
             <Text style={mode === 'light' ? lightMode.text : darkMode.text}>
               {t('dontHaveAccount')}
             </Text>
-            <Button onPress={() => navigate('Register')}>
+            <Button
+              onPress={() => {
+                setUser({
+                  email: '',
+                  password: '',
+                  remember_me: false,
+                });
+                navigate('Register');
+              }}
+            >
               <Text style={{ color: colors.primary }}> {t('register')}</Text>
             </Button>
           </View>
         </View>
-      </ScrollView>
+      </View>
       <AlertModal
         visible={show}
         type="warning"
-        buttonText={t('activate')}
+        buttonText={t('activate', { ns: 'common' })}
         title={t('accountInactivate')}
         text={t('activateMessage')}
-        onOkPress={() => navigate('Activate')}
+        onOkPress={() => navigate('Activate', { email: user.email })}
         setVisible={setShow}
       />
-    </KeyboardAvoidingView>
+    </View>
+    // </KeyboardView>
   );
 };
 

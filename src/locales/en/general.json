@@ -11,7 +11,6 @@
   "register": "Sign up",
   "dontHaveAccount": "Don't have an account?",
   "alreadyHaveAccount": "Already have an account?",
-  "next": "Next",
   "resendCode": "Resend code",
   "limitPassword": "At least 5 character",
   "activate": "Activate",
@@ -24,5 +23,7 @@
   "pleaseCheck": "Please check",
   "empty": "Empty",
   "validIn": "Valid in",
-  "minutes": "Minutes"
+  "minutes": "Minutes",
+  "invalidEmail": "Invalid email",
+  "backTo": "Back to"
 }

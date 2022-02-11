@@ -1,33 +1,61 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Text, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import useDeviceInfo from '../../../utilities/hooks/useDeviceInfo';
-import { TextField, ButtonFill, Button, CheckBox, TextAdvance } from '../../../components';
+import {
+  TextField,
+  ButtonFill,
+  Button,
+  CheckBox,
+  TextAdvance,
+  KeyboardView,
+} from '../../../components';
 import colors from '../../../config/colors';
 import { useNavigation } from '@react-navigation/native';
 import { goBack, navigate } from '../../../service/navigationService';
 import { RegisterProps } from '../../../shared/type';
-import { registerAPI } from '../../../api/authentication/registerAPI';
+import { requestCodeAPI, registerAPI } from '../../../api/authentication';
 import { scale, verticalScale } from '../../../utilities/functions/scaling';
 import { useTranslation } from 'react-i18next';
-import { useAppSelector } from '../../../utilities/functions/common';
+import { useAppDispatch, useAppSelector } from '../../../utilities/functions/common';
 import { darkMode, lightMode } from './styles';
 import { toast } from '../../../utilities/functions/toast';
+import { setUserRegister } from '../../../redux/slices/userSlice';
 
-interface RegisterScreenProps {}
+interface RegisterScreenProps {
+  route: any;
+}
 
-const RegisterScreen: React.FC<RegisterScreenProps> = props => {
+const RegisterScreen: React.FC<RegisterScreenProps> = ({ route }) => {
   const { statusBarHeight } = useDeviceInfo(true);
+  const userParams = route.params?.item;
   const mode = useAppSelector(state => state.settings.mode);
+  const dispatch = useAppDispatch();
   // const navigation = useNavigation();
-  const { t, i18n } = useTranslation('general');
+  const { t, i18n } = useTranslation(['general', 'common']);
+
+  console.log(route.params?.item);
 
   const [check, setCheck] = useState<boolean>(false);
+  const [step, setStep] = useState<number>(0);
 
   const [user, setUser] = useState<RegisterProps>({
     email: '',
     password: '',
     confirm: '',
+    phone: '',
+    first_name: '',
+    last_name: '',
+    day_of_birth: '',
   });
+
+  useEffect(() => {
+    if (userParams) {
+      setUser({
+        ...user,
+        email: userParams.email,
+      });
+    }
+  }, [userParams]);
 
   const onRegister = async () => {
     if (user.password !== user.confirm) {
@@ -35,110 +63,170 @@ const RegisterScreen: React.FC<RegisterScreenProps> = props => {
     } else {
       // const res = await registerAPI(user);
       // console.log(res);
-      navigate('Activate', user);
+      if (!user.email.includes('@gmail.com')) {
+        toast(t('invalidEmail'), 'error');
+      } else {
+        dispatch(setUserRegister(user));
+        navigate('AddInfo', user);
+      }
     }
   };
 
-  return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={[
-        mode === 'light' ? lightMode.container : darkMode.container,
-        {
-          paddingTop: statusBarHeight,
-        },
-      ]}
-    >
-      <ScrollView contentContainerStyle={{ flex: 1 }}>
-        <View style={styles.header}>
-          <Text style={{ fontSize: 40, color: colors.primary }}>social</Text>
-        </View>
-        <View style={styles.footer}>
-          <View>
-            <TextAdvance
-              value={user.email}
-              placeHolder={t('email')}
-              keyboardType="email-address"
-              isFocus
-              showIcon
-              onChangeText={e => {
-                setUser({
-                  ...user,
-                  email: e,
-                });
-              }}
-            />
-            <TextAdvance
-              value={user.password}
-              placeHolder={t('password')}
-              isFocus
-              showIcon
-              style={{ marginTop: verticalScale(30) }}
-              onChangeText={e => {
-                setUser({
-                  ...user,
-                  password: e,
-                });
-              }}
-              secureTextEntry={true}
-            />
-            <TextAdvance
-              value={user.confirm}
-              placeHolder={t('reEnterPassword')}
-              isFocus
-              style={{ marginTop: verticalScale(30) }}
-              showIcon
-              onChangeText={e => {
-                setUser({
-                  ...user,
-                  confirm: e,
-                });
-              }}
-              secureTextEntry={true}
-            />
-            <View
-              style={{
-                flexDirection: 'row',
-                marginTop: scale(20),
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-            >
-              <Button
-                title={t('forgotPassword')}
-                titleStyle={mode === 'light' ? lightMode.text : darkMode.text}
-                onPress={() => console.log('forget')}
-              />
-              {/* <Text style={mode === 'light' ? lightMode.text : darkMode.text}>
-                  {t('forgotPassword')}
-                </Text> */}
-              {/* </Button> */}
-            </View>
+  const onForgotPassword = async () => {
+    if (!user.email.includes('@gmail.com')) {
+      toast(t('invalidEmail'), 'error');
+    } else {
+      const res = await requestCodeAPI({ email: user.email });
+      if (res.data.success && res.data.statusCode === 200) {
+        navigate('Activate', { email: user.email });
+      }
+    }
+  };
 
-            <ButtonFill
-              text={t('next').toString()}
-              onPress={() => onRegister()}
-              style={{ marginTop: verticalScale(45), marginBottom: verticalScale(20) }}
-              disabled={!user.email || !user.password || !user.confirm}
-            />
-          </View>
+  const _renderRegister = () => {
+    return (
+      <View style={styles.footer}>
+        <View>
+          <TextAdvance
+            value={user.email}
+            placeHolder={t('email')}
+            keyboardType="email-address"
+            isFocus
+            showIcon
+            onChangeText={e => {
+              setUser({
+                ...user,
+                email: e,
+              });
+            }}
+          />
+          <TextAdvance
+            value={user.password}
+            placeHolder={t('password')}
+            isFocus
+            showIcon
+            style={{ marginTop: verticalScale(30) }}
+            onChangeText={e => {
+              setUser({
+                ...user,
+                password: e,
+              });
+            }}
+            secureTextEntry={true}
+          />
+          <TextAdvance
+            value={user.confirm}
+            placeHolder={t('reEnterPassword')}
+            isFocus
+            style={{ marginTop: verticalScale(30) }}
+            showIcon
+            onChangeText={e => {
+              setUser({
+                ...user,
+                confirm: e,
+              });
+            }}
+            secureTextEntry={true}
+          />
           <View
             style={{
               flexDirection: 'row',
-              justifyContent: 'center',
-              marginBottom: verticalScale(20),
+              marginTop: scale(20),
+              justifyContent: 'space-between',
+              alignItems: 'center',
             }}
           >
-            <Text style={mode === 'light' ? lightMode.text : darkMode.text}>
-              {t('alreadyHaveAccount')}
-            </Text>
-            <Button onPress={() => goBack()}>
-              <Text style={{ color: colors.primary }}> {t('login')}</Text>
-            </Button>
+            {/* <Text style={mode === 'light' ? lightMode.text : darkMode.text}>
+              {t('forgotPassword')}
+            </Text> */}
+            {/* </Button> */}
+            <CheckBox checked={check} setChecked={() => setCheck(!check)} />
+            <View
+              style={{
+                flexDirection: 'row',
+              }}
+            >
+              <Text style={styles.text}>I agree to the</Text>
+              <Text style={styles.textPrimary}> Term of Service</Text>
+              <Text style={styles.text}> and</Text>
+              <Text style={styles.textPrimary}> Privacy Policy</Text>
+            </View>
           </View>
+
+          <ButtonFill
+            text={t('next', { ns: 'common' }).toString()}
+            onPress={() => onRegister()}
+            style={{ marginTop: verticalScale(45), marginBottom: verticalScale(20) }}
+            disabled={!user.email || !user.password || !user.confirm}
+          />
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            marginBottom: verticalScale(20),
+          }}
+        >
+          <Text style={mode === 'light' ? lightMode.text : darkMode.text}>
+            {t('alreadyHaveAccount')}
+          </Text>
+          <Button onPress={() => goBack()}>
+            <Text style={{ color: colors.primary }}> {t('login')}</Text>
+          </Button>
+        </View>
+      </View>
+    );
+  };
+
+  const _renderForgotPassword = () => {
+    return (
+      <View style={styles.footer}>
+        <View>
+          <TextAdvance
+            value={user.email}
+            placeHolder={t('email')}
+            keyboardType="email-address"
+            isFocus
+            showIcon
+            onChangeText={e => {
+              setUser({
+                ...user,
+                email: e,
+              });
+            }}
+          />
+          <ButtonFill
+            text={t('submit', { ns: 'common' }).toString()}
+            onPress={() => onForgotPassword()}
+            style={{ marginTop: verticalScale(45), marginBottom: verticalScale(20) }}
+            disabled={!user.email}
+          />
+        </View>
+        <View
+          style={{
+            justifyContent: 'center',
+            marginBottom: verticalScale(20),
+          }}
+        >
+          <Button onPress={() => goBack()}>
+            <Text style={{ color: colors.primary, textAlign: 'center' }}>
+              {t('backTo')} {t('login')}
+            </Text>
+          </Button>
+        </View>
+      </View>
+    );
+  };
+
+  return (
+    // <KeyboardView>
+    <View style={{ flex: 1, width: '100%' }}>
+      <View style={styles.header}>
+        <Text style={{ fontSize: 40, color: colors.primary }}>social</Text>
+      </View>
+      {route.params?.from === 'forgot' ? _renderForgotPassword() : _renderRegister()}
+    </View>
+    // </KeyboardView>
   );
 };
 

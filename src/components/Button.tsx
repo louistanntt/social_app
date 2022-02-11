@@ -15,12 +15,7 @@ type ButtonProps = {
 const Button = (props: ButtonProps) => {
   const { onPress, children, style, disable, title, titleStyle } = props;
   return (
-    <TouchableOpacity
-      disabled={disable}
-      style={[style, { flexDirection: 'row' }]}
-      onPress={onPress}
-      activeOpacity={0.6}
-    >
+    <TouchableOpacity disabled={disable} style={[style]} onPress={onPress} activeOpacity={0.6}>
       {children}
       {title && <Text style={[titleStyle]}>{title}</Text>}
     </TouchableOpacity>

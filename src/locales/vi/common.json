@@ -1,4 +1,7 @@
 {
-  "weather": "Thời tiết",
-  "settings": "Cài đặt"
+  "next": "Tiếp theo",
+  "goBack": "Trở về",
+  "empty": "Xoá hết",
+  "activate": "Kích hoạt",
+  "submit": "Gửi"
 }
