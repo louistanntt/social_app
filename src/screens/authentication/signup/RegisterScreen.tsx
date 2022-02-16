@@ -12,7 +12,7 @@ import {
 import colors from '../../../config/colors';
 import { useNavigation } from '@react-navigation/native';
 import { goBack, navigate } from '../../../service/navigationService';
-import { RegisterProps } from '../../../shared/type';
+import { LoginProps, RegisterProps } from '../../../shared/type';
 import { requestCodeAPI, registerAPI } from '../../../api/authentication';
 import { scale, verticalScale } from '../../../utilities/functions/scaling';
 import { useTranslation } from 'react-i18next';
@@ -28,25 +28,21 @@ interface RegisterScreenProps {
 const RegisterScreen: React.FC<RegisterScreenProps> = ({ route }) => {
   const { statusBarHeight } = useDeviceInfo(true);
   const userParams = route.params?.item;
+  const from = route.params?.from;
   const mode = useAppSelector(state => state.settings.mode);
   const dispatch = useAppDispatch();
   // const navigation = useNavigation();
-  const { t, i18n } = useTranslation(['general', 'common']);
-
-  console.log(route.params?.item);
+  const { t } = useTranslation(['general', 'common', 'error']);
 
   const [check, setCheck] = useState<boolean>(false);
   const [step, setStep] = useState<number>(0);
-
-  const [user, setUser] = useState<RegisterProps>({
+  const [loading, setLoading] = useState<boolean>(false);
+  const [user, setUser] = useState<Omit<LoginProps, 'remember_me'>>({
     email: '',
     password: '',
-    confirm: '',
-    phone: '',
-    first_name: '',
-    last_name: '',
-    day_of_birth: '',
   });
+
+  const [confirm, setConfirm] = useState<string>('');
 
   useEffect(() => {
     if (userParams) {
@@ -58,28 +54,34 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ route }) => {
   }, [userParams]);
 
   const onRegister = async () => {
-    if (user.password !== user.confirm) {
-      toast(t('passwordNotMatch'), 'error');
+    if (user.password !== confirm) {
+      toast(t('passwordNotMatch', { ns: 'error' }), 'error');
     } else {
-      // const res = await registerAPI(user);
-      // console.log(res);
       if (!user.email.includes('@gmail.com')) {
-        toast(t('invalidEmail'), 'error');
+        toast(t('invalidEmail', { ns: 'error' }), 'error');
       } else {
-        dispatch(setUserRegister(user));
+        // dispatch(setUserRegister(user));
         navigate('AddInfo', user);
       }
     }
   };
 
   const onForgotPassword = async () => {
-    if (!user.email.includes('@gmail.com')) {
-      toast(t('invalidEmail'), 'error');
-    } else {
+    // if (!user.email.includes('@gmail.com')) {
+    //   return toast(t('invalidEmail', { ns: 'error' }), 'error');
+    // }
+    try {
+      setLoading(true);
       const res = await requestCodeAPI({ email: user.email });
+      setLoading(false);
       if (res.data.success && res.data.statusCode === 200) {
-        navigate('Activate', { email: user.email });
+        navigate('Activate', { email: user.email, from: 'forgot' });
+      } else {
+        toast(t('invalidEmail', { ns: 'error' }), 'error');
       }
+    } catch (error) {
+      setLoading(false);
+      toast(t('invalidEmail', { ns: 'error' }), 'error');
     }
   };
 
@@ -115,16 +117,13 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ route }) => {
             secureTextEntry={true}
           />
           <TextAdvance
-            value={user.confirm}
+            value={confirm}
             placeHolder={t('reEnterPassword')}
             isFocus
             style={{ marginTop: verticalScale(30) }}
             showIcon
             onChangeText={e => {
-              setUser({
-                ...user,
-                confirm: e,
-              });
+              setConfirm(e);
             }}
             secureTextEntry={true}
           />
@@ -136,10 +135,6 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ route }) => {
               alignItems: 'center',
             }}
           >
-            {/* <Text style={mode === 'light' ? lightMode.text : darkMode.text}>
-              {t('forgotPassword')}
-            </Text> */}
-            {/* </Button> */}
             <CheckBox checked={check} setChecked={() => setCheck(!check)} />
             <View
               style={{
@@ -157,7 +152,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ route }) => {
             text={t('next', { ns: 'common' }).toString()}
             onPress={() => onRegister()}
             style={{ marginTop: verticalScale(45), marginBottom: verticalScale(20) }}
-            disabled={!user.email || !user.password || !user.confirm}
+            disabled={!user.email || !user.password || !confirm}
           />
         </View>
         <View
@@ -200,6 +195,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ route }) => {
             onPress={() => onForgotPassword()}
             style={{ marginTop: verticalScale(45), marginBottom: verticalScale(20) }}
             disabled={!user.email}
+            loading={loading}
           />
         </View>
         <View
@@ -224,7 +220,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ route }) => {
       <View style={styles.header}>
         <Text style={{ fontSize: 40, color: colors.primary }}>social</Text>
       </View>
-      {route.params?.from === 'forgot' ? _renderForgotPassword() : _renderRegister()}
+      {from === 'forgot' ? _renderForgotPassword() : _renderRegister()}
     </View>
     // </KeyboardView>
   );

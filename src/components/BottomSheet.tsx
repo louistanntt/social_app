@@ -5,6 +5,7 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
+  runOnJS,
 } from 'react-native-reanimated';
 import { PanGestureHandler } from 'react-native-gesture-handler';
 import useDeviceInfo from '../utilities/hooks/useDeviceInfo';
@@ -17,16 +18,28 @@ type Context = {
 
 type BottomSheetProps = {
   show: boolean;
+  stack?: number;
   children?: any;
   style?: StyleProp<ViewStyle>;
   topOffSet?: number;
   onOpen?: (e?: any) => void;
   onClose?: (e?: any) => void;
   setShow?: React.Dispatch<SetStateAction<boolean>>;
+  scrollable?: boolean;
 };
 
 const BottomSheet = (props: BottomSheetProps) => {
-  const { show, children, style, topOffSet, onOpen, onClose, setShow } = props;
+  const {
+    show,
+    children,
+    style,
+    topOffSet,
+    onOpen,
+    onClose,
+    setShow,
+    stack = 2,
+    scrollable = true,
+  } = props;
   const { windowWidth, windowHeight, statusBarHeight } = useDeviceInfo(true);
   const top = useSharedValue(topOffSet ? topOffSet : windowHeight);
   const SPRING_CONFIG = {
@@ -49,15 +62,17 @@ const BottomSheet = (props: BottomSheetProps) => {
     if (onOpen) {
       await onOpen();
     }
-    top.value = withSpring(topOffSet ? topOffSet : windowHeight / 1.2, SPRING_CONFIG);
+    top.value = withSpring(topOffSet ? topOffSet : windowHeight / stack, SPRING_CONFIG);
   };
 
-  const onCloseSheet = async () => {
-    console.log('ok');
+  const onCloseSheet = () => {
     if (onClose) {
-      await onClose();
+      onClose();
     }
     top.value = withSpring(windowHeight, SPRING_CONFIG);
+    if (setShow) {
+      return setShow(false);
+    }
   };
 
   const gestureHandler = useAnimatedGestureHandler({
@@ -68,32 +83,27 @@ const BottomSheet = (props: BottomSheetProps) => {
       top.value = context.startTop + event.translationY;
     },
     onEnd() {
-      // if (top.value < windowHeight / 3 - 100) {
-      //   top.value = windowHeight / 3;
-      // }
+      if (scrollable) {
+        if (top.value < windowHeight / 4) {
+          return (top.value = statusBarHeight);
+        }
+        // if (top.value > windowHeight / 2 && top.value < (windowHeight * 3) / 4) {
+        //   return (top.value = windowHeight / 1.2);
+        // }
 
-      console.log(top.value);
-      console.log(windowHeight);
-
-      if (top.value > windowHeight - 50) {
-        ('worklet');
-        return onCloseSheet();
+        if (top.value > windowHeight / 2 + 200) {
+          top.value = windowHeight;
+          runOnJS(onCloseSheet)();
+        } else {
+          return (top.value = windowHeight / stack);
+        }
+      } else {
+        top.value = windowHeight / stack;
       }
-
-      // if (top.value < windowHeight / 4) {
-      //   return (top.value = statusBarHeight);
-      // }
-      // if (top.value > windowHeight / 2 && top.value < (windowHeight * 3) / 4) {
-      //   return (top.value = windowHeight / 1.2);
-      // }
-
-      // if (top.value > windowHeight / 2 + 200) {
-      //   top.value = windowHeight;
-      // } else {
-      //   return (top.value = windowHeight / 2);
-      // }
     },
   });
+
+  console.log(scrollable);
 
   return (
     <>
@@ -122,6 +132,26 @@ const BottomSheet = (props: BottomSheetProps) => {
             style,
           ]}
         >
+          {/* {show ? (
+            <Button
+              onPress={() => {
+                setShow && setShow(false);
+                onCloseSheet();
+              }}
+              style={[
+                styles.overlay,
+                {
+                  height: windowHeight + 100,
+                  width: windowWidth + 100,
+                  top: -(windowHeight / 2 + 100),
+                  left: -(windowWidth / 2 - 100),
+                },
+              ]}
+            />
+          ) : null} */}
+          <View style={styles.wrapperLine}>
+            <View style={[styles.line]} />
+          </View>
           {children || <Text>Sheet</Text>}
         </Animated.View>
       </PanGestureHandler>
@@ -130,7 +160,16 @@ const BottomSheet = (props: BottomSheetProps) => {
 };
 
 const styles = StyleSheet.create({
-  container: { justifyContent: 'center', alignItems: 'center', flex: 1 },
+  wrapperLine: { alignItems: 'center', marginTop: -10 },
+  overlay: {
+    backgroundColor: 'red',
+  },
+  line: {
+    backgroundColor: colors.lightGray,
+    width: 80,
+    height: 5,
+    borderRadius: 30,
+  },
 });
 
 export default memo(BottomSheet);

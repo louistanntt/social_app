@@ -16,6 +16,7 @@ type HeaderProps = {
   centerContainerStyle?: StyleProp<ViewStyle>;
   rightContainerStyle?: StyleProp<ViewStyle>;
   style?: StyleProp<ViewStyle>;
+  noBorder?: boolean;
 };
 
 const Header = (props: HeaderProps) => {
@@ -27,11 +28,18 @@ const Header = (props: HeaderProps) => {
     centerContainerStyle,
     rightContainerStyle,
     style,
+    noBorder = false,
   } = props;
 
   const { t } = useTranslation(['general', 'common']);
   return (
-    <View style={[styles.header, style]}>
+    <View
+      style={[
+        styles.header,
+        style,
+        !noBorder && { borderBottomWidth: 3, borderBottomColor: colors.white },
+      ]}
+    >
       <View
         style={[
           styles.container,
@@ -87,8 +95,6 @@ const styles = StyleSheet.create({
     zIndex: 10,
     height: 50,
     backgroundColor: 'transparent',
-    borderBottomWidth: 3,
-    borderBottomColor: colors.white,
     flexDirection: 'row',
     alignItems: 'center',
   },

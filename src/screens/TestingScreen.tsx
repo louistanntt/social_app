@@ -1,11 +1,13 @@
+import moment, { Moment } from 'moment';
 import React, { useState } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
-import { BottomSheet, Button, Toast } from '../components';
+import { BottomSheet, Button, Toast, DatePicker } from '../components';
 
 interface TestingScreenProps {}
 
 const TestingScreen: React.FC<TestingScreenProps> = () => {
   const [show, setShow] = useState<boolean>(false);
+  const [date, setDate] = useState<Moment>(moment());
   return (
     <View
       style={styles.container}
@@ -16,7 +18,7 @@ const TestingScreen: React.FC<TestingScreenProps> = () => {
       // }}
     >
       <Button title="Open Bottom Sheet" onPress={() => setShow(!show)} />
-      <BottomSheet
+      {/* <BottomSheet
         show={show}
         setShow={setShow}
         onOpen={() => console.log('opening')}
@@ -26,7 +28,8 @@ const TestingScreen: React.FC<TestingScreenProps> = () => {
         }}
       >
         <Text>This is Bottom Sheet</Text>
-      </BottomSheet>
+      </BottomSheet> */}
+      <DatePicker date={date} setDate={setDate} show={show} setShow={setShow} />
     </View>
   );
 };

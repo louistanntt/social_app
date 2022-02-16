@@ -9,7 +9,9 @@ import { useAppSelector } from '../../../utilities/functions/common';
 import { darkMode, lightMode } from './styles';
 import { useTranslation } from 'react-i18next';
 import useInterval from '../../../utilities/hooks/useInterval';
-import { requestCodeAPI } from '../../../api/authentication';
+import { requestCodeAPI, validateCodeAPI } from '../../../api/authentication';
+import { toast } from '../../../utilities/functions/toast';
+import { navigate } from '../../../service/navigationService';
 
 interface ActivateScreenProps {
   route: any;
@@ -18,6 +20,7 @@ interface ActivateScreenProps {
 
 const ActivateScreen: React.FC<ActivateScreenProps> = ({ route, navigation }) => {
   const userParams = route.params?.email;
+  const from = route.params?.from;
   const { statusBarHeight, windowWidth, windowHeight } = useDeviceInfo(true);
   const mode = useAppSelector(state => state.settings.mode);
 
@@ -35,9 +38,29 @@ const ActivateScreen: React.FC<ActivateScreenProps> = ({ route, navigation }) =>
     isRunning ? delay : null,
   );
 
-  const { t } = useTranslation(['general', 'common']);
+  const { t } = useTranslation(['general', 'common', 'error']);
 
   const [OTP, setOTP] = useState<Array<string>>([]);
+
+  const onResendCode = async () => {
+    if (userParams) {
+      await requestCodeAPI({ email: userParams });
+    }
+  };
+
+  const onActivate = async () => {
+    try {
+      const res = await validateCodeAPI({
+        email: userParams,
+        reset_code: OTP.join(''),
+      });
+      if (res.data.success) {
+        navigate('AddInfo', { from: from });
+      }
+    } catch (error: any) {
+      toast(t('invalidCode', { ns: 'error' }), 'error');
+    }
+  };
 
   const _renderNumericKeyPad = () => {
     const numericKeyPad = [
@@ -118,16 +141,7 @@ const ActivateScreen: React.FC<ActivateScreenProps> = ({ route, navigation }) =>
     );
   };
 
-  console.log(userParams);
-
-  const onResendCode = async () => {
-    if (userParams) {
-      const res = await requestCodeAPI({ email: userParams });
-      console.log(res);
-    } else {
-      console.log('ko');
-    }
-  };
+  console.log(from);
 
   return (
     <View style={[mode === 'light' ? lightMode.container : darkMode.container]}>
@@ -141,7 +155,7 @@ const ActivateScreen: React.FC<ActivateScreenProps> = ({ route, navigation }) =>
           <Text
             style={[mode === 'light' ? lightMode.text : darkMode.text, { color: colors.primary }]}
           >
-            {route.params?.email}.{' '}
+            {userParams}.{' '}
           </Text>
           <Text style={mode === 'light' ? lightMode.text : darkMode.text}>{t('pleaseCheck')}!</Text>
         </View>
@@ -252,8 +266,8 @@ const ActivateScreen: React.FC<ActivateScreenProps> = ({ route, navigation }) =>
           </Button>
           <ButtonFill
             disabled={OTP.length < 6}
-            text={t('activate', { ns: 'common' })}
-            onPress={() => console.log('2')}
+            text={t(`${from === 'forgot' ? 'submit' : 'activate'}`, { ns: 'common' })}
+            onPress={() => onActivate()}
             style={{ width: '45%' }}
           />
         </View>
@@ -270,6 +284,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flexWrap: 'wrap',
     paddingVertical: verticalScale(5),
+    paddingHorizontal: scale(10),
     flex: 1,
   },
   pinPad: {

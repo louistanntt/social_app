@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, memo } from 'react';
 import { ScrollView, Dimensions, Keyboard, Platform } from 'react-native';
 import { scale, verticalScale, moderateScale } from '../utilities/functions/scaling';
 import Animated, { withSpring, useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
@@ -63,4 +63,4 @@ const KeyboardView = (props: KeyboardViewProps) => {
     </ScrollView>
   );
 };
-export default KeyboardView;
+export default memo(KeyboardView);

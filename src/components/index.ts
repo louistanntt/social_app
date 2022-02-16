@@ -9,6 +9,8 @@ import TextAdvance from "./TextAdvance";
 import Toast from "./Toast";
 import ToastCustom from './ToastCustom';
 import Header from './Header';
+import DatePicker from './DatePicker';
+import DateTimePicker from './DateTimePicker';
 
 
-export  { AlertModal, BottomSheet, Button, ButtonFill, CheckBox, KeyboardView, TextField, ToastCustom, Header, TextAdvance, Toast }
+export  { AlertModal, BottomSheet, Button, ButtonFill, CheckBox, KeyboardView, TextField, ToastCustom, Header, TextAdvance, Toast, DatePicker, DateTimePicker }

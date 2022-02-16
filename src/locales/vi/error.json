@@ -1,4 +1,7 @@
 {
-  "humidity": "Độ ẩm",
-  "today": "Hôm nay"
+  "limitPassword": "Ít nhất 5 kí tự",
+  "validateUser": "Các trường không được trống",
+  "passwordNotMatch": "Mật khẩu không trùng khớp",
+  "invalidEmail": "Email không hợp lệ",
+  "invalidCode": "Mã kích hoạt không hợp lệ"
 }

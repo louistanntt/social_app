@@ -77,7 +77,7 @@ const Root: React.FC<RootProps> = props => {
         <RootStack.Navigator screenOptions={{ headerShown: false }}>
           {isLoggedIn && isRemember ? (
             <>
-              <RootStack.Screen name="Main" component={MainRoute} />
+              {/* <RootStack.Screen name="Main" component={MainRoute} /> */}
               <RootStack.Screen name="Auth" component={AuthRoute} />
             </>
           ) : (

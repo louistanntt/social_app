@@ -40,10 +40,9 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
     useDeviceInfo(true);
   const mode = useAppSelector(state => state.settings.mode);
   const { keyboardShown } = useKeyboard();
-  // const navigation = useNavigation();
   const dispatch = useAppDispatch();
 
-  const { t, i18n } = useTranslation(['general', 'common']);
+  const { t, i18n } = useTranslation(['general', 'common', 'error']);
 
   const [user, setUser] = useState<LoginProps>({
     email: 'louistanntt',
@@ -51,10 +50,11 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
     remember_me: false,
   });
   const [show, setShow] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const onLogin = async () => {
     if (!user.email || !user.password) {
-      toast(t('validateUser'), 'error');
+      toast(t('validateUser', { ns: 'error' }), 'error');
     } else {
       let email = user.email;
       if (process.env.NODE_ENV === 'development') {
@@ -63,6 +63,7 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
         }
       }
       try {
+        setLoading(true);
         const res = await loginAPI({
           email: email,
           password: user.password,
@@ -70,9 +71,11 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
         });
         await saveToken(res.data.access_token);
         await saveRemember(user.remember_me);
+        setLoading(false);
         navigate('Main');
       } catch (err: any) {
         if (err?.response.status === 401) {
+          setLoading(false);
           setShow(true);
         }
 
@@ -142,6 +145,7 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
             <ButtonFill
               text={t('login').toString()}
               onPress={() => onLogin()}
+              loading={loading}
               style={{ marginTop: verticalScale(45), marginBottom: verticalScale(20) }}
             />
           </View>
