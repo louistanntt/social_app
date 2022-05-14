@@ -11,6 +11,7 @@ import ToastCustom from './ToastCustom';
 import Header from './Header';
 import DatePicker from './DatePicker';
 import DateTimePicker from './DateTimePicker';
+import Modalize from './Modalize';
 
 
-export  { AlertModal, BottomSheet, Button, ButtonFill, CheckBox, KeyboardView, TextField, ToastCustom, Header, TextAdvance, Toast, DatePicker, DateTimePicker }
+export  { AlertModal, BottomSheet, Button, ButtonFill, CheckBox, KeyboardView, TextField, ToastCustom, Header, TextAdvance, Toast, DatePicker, DateTimePicker, Modalize }

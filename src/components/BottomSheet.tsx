@@ -1,5 +1,4 @@
-import React, { memo, SetStateAction, useEffect, useState } from 'react';
-import { StyleSheet, View, Text, StyleProp, ViewStyle } from 'react-native';
+import 'react-native-reanimated';
 import Animated, {
   useAnimatedGestureHandler,
   useSharedValue,
@@ -7,6 +6,8 @@ import Animated, {
   withSpring,
   runOnJS,
 } from 'react-native-reanimated';
+import React, { memo, SetStateAction, useEffect, useState } from 'react';
+import { StyleSheet, View, Text, StyleProp, ViewStyle } from 'react-native';
 import { PanGestureHandler } from 'react-native-gesture-handler';
 import useDeviceInfo from '../utilities/hooks/useDeviceInfo';
 import colors from '../config/colors';
@@ -26,6 +27,7 @@ type BottomSheetProps = {
   onClose?: (e?: any) => void;
   setShow?: React.Dispatch<SetStateAction<boolean>>;
   scrollable?: boolean;
+  line?: boolean;
 };
 
 const BottomSheet = (props: BottomSheetProps) => {
@@ -39,6 +41,7 @@ const BottomSheet = (props: BottomSheetProps) => {
     setShow,
     stack = 2,
     scrollable = true,
+    line = true,
   } = props;
   const { windowWidth, windowHeight, statusBarHeight } = useDeviceInfo(true);
   const top = useSharedValue(topOffSet ? topOffSet : windowHeight);
@@ -103,8 +106,6 @@ const BottomSheet = (props: BottomSheetProps) => {
     },
   });
 
-  console.log(scrollable);
-
   return (
     <>
       <PanGestureHandler onGestureEvent={gestureHandler}>
@@ -149,9 +150,12 @@ const BottomSheet = (props: BottomSheetProps) => {
               ]}
             />
           ) : null} */}
-          <View style={styles.wrapperLine}>
-            <View style={[styles.line]} />
-          </View>
+          {line ? (
+            <View style={styles.wrapperLine}>
+              <View style={[styles.line]} />
+            </View>
+          ) : null}
+
           {children || <Text>Sheet</Text>}
         </Animated.View>
       </PanGestureHandler>

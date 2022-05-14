@@ -15,7 +15,7 @@ const KeyboardView = (props: KeyboardViewProps) => {
   const scaleAnim = useSharedValue(0);
   const animatedStyles = useAnimatedStyle(() => {
     return {
-      transform: [{ translateY: -scaleAnim.value }],
+      transform: [{ translateY: - scaleAnim.value }],
     };
   });
   useEffect(() => {
@@ -34,8 +34,8 @@ const KeyboardView = (props: KeyboardViewProps) => {
         ? Keyboard.addListener('keyboardWillHide', onKeyboardHide)
         : Keyboard.addListener('keyboardDidHide', onKeyboardHide);
     return () => {
-      Keyboard.removeSubscription(eventShow);
-      Keyboard.removeSubscription(eventHide);
+      eventShow.remove();
+      eventHide.remove();
     };
   }, []);
   return (

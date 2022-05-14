@@ -71,7 +71,7 @@ const MainRoute = () => {
   );
   // return (
   //   <MainStack.Navigator screenOptions={{ headerShown: false }}>
-  //     {/* <MainStack.Screen name="Testing" component={TestingScreen} /> */}
+  //     <MainStack.Screen name="Testing" component={TestingScreen} />
   //     <MainStack.Screen name="Home" component={HomeScreen} />
   //   </MainStack.Navigator>
   // );

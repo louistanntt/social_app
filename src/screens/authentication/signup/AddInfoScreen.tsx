@@ -59,16 +59,18 @@ const AddInfoScreen: React.FC<AddInfoScreenProps> = ({ route }) => {
   }, [userParams]);
 
   const onSubmit = async () => {
+    console.log(from);
     try {
       setLoading(true);
-      const res = await registerAPI({
-        email: '',
-        password: '',
-        phone: '',
-        first_name: '',
-        last_name: '',
-        date_of_birth: '',
-      });
+      // const res = await registerAPI({
+      //   email: '',
+      //   password: '',
+      //   phone: '',
+      //   first_name: '',
+      //   last_name: '',
+      //   date_of_birth: '',
+      // });
+      navigate('Activate', { email: user.email, from: 'register' });
     } catch (error) {}
   };
 
@@ -151,9 +153,9 @@ const AddInfoScreen: React.FC<AddInfoScreenProps> = ({ route }) => {
             borderWidth: 1,
             borderColor: colors.lightGray,
             alignItems: 'flex-start',
-            paddingHorizontal: scale(10),
+            paddingHorizontal: scale(15),
           }}
-          textStyle={{ color: colors.gray, fontWeight: '300', fontSize: 14 }}
+          textStyle={{ color: colors.gray, fontWeight: '400', fontSize: 14 }}
         />
       </View>
     );
@@ -189,9 +191,8 @@ const AddInfoScreen: React.FC<AddInfoScreenProps> = ({ route }) => {
           </View>
         </View>
       </View>
-      {/* <BottomSheet show={show} setShow={setShow} scrollable={false} stack={1.5} /> */}
+
       <DateTimePicker date={date} setDate={setDate} show={show} setShow={setShow} />
-      {/* <DatePicker date={date} setDate={setDate} show={show} setShow={setShow} /> */}
     </View>
     // </KeyboardView>
   );

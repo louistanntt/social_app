@@ -11,7 +11,7 @@ import { setMode, setLanguage, setToken, setRemember } from './src/redux/slices/
 import LoadingScreen from './src/screens/LoadingScreen';
 import { config } from './src/config/general';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import ToastCustom from './src/components/ToastCustom';
+// import ToastCustom from './src/components/ToastCustom';
 const RootStack = createNativeStackNavigator();
 
 interface RootProps {}
@@ -77,7 +77,7 @@ const Root: React.FC<RootProps> = props => {
         <RootStack.Navigator screenOptions={{ headerShown: false }}>
           {isLoggedIn && isRemember ? (
             <>
-              {/* <RootStack.Screen name="Main" component={MainRoute} /> */}
+              <RootStack.Screen name="Main" component={MainRoute} />
               <RootStack.Screen name="Auth" component={AuthRoute} />
             </>
           ) : (
@@ -88,7 +88,7 @@ const Root: React.FC<RootProps> = props => {
           )}
         </RootStack.Navigator>
       </NavigationContainer>
-      <ToastCustom />
+      {/* <ToastCustom /> */}
     </View>
   );
 };
