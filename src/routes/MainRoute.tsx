@@ -69,12 +69,6 @@ const MainRoute = () => {
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
-  // return (
-  //   <MainStack.Navigator screenOptions={{ headerShown: false }}>
-  //     <MainStack.Screen name="Testing" component={TestingScreen} />
-  //     <MainStack.Screen name="Home" component={HomeScreen} />
-  //   </MainStack.Navigator>
-  // );
 };
 
 export default MainRoute;
