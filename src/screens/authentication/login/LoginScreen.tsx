@@ -1,20 +1,37 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Text,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
+  Alert,
+} from 'react-native';
 import useDeviceInfo from '../../../utilities/hooks/useDeviceInfo';
-import { TextField, ButtonFill, Button, CheckBox, AlertModal } from '../../../components';
+import {
+  TextField,
+  ButtonFill,
+  Button,
+  CheckBox,
+  AlertModal,
+  TextAdvance,
+} from '../../../components';
 // import { colors, configInstance } from '../../../config';
 import useKeyboard from '../../../utilities/hooks/useKeyboard';
 import { moderateScale, scale, verticalScale } from '../../../utilities/functions/scaling';
 import { toast } from '../../../utilities/functions/toast';
 import { navigate } from '../../../service/navigationService';
-import { darkMode, lightMode } from './styles';
-import { useAppSelector } from '../../../utilities/functions/common';
+import { useAppDispatch, useAppSelector } from '../../../utilities/functions/common';
 import { setLanguage } from '../../../redux/slices/settingsSlice';
 import { useTranslation } from 'react-i18next';
 import { LoginProps } from '../../../shared/type';
-import { loginAPI } from '../../../api/authentication/loginAPI';
+import { loginAPI } from '../../../api/authentication';
 import configInstance from '../../../config/environment';
 import colors from '../../../config/colors';
+import { darkMode, lightMode } from './styles';
+import { saveToken, saveRemember } from '../../../utilities/functions/tokenStorage';
+import { KeyboardView } from '../../../components/index';
 
 interface LoginScreenProps {}
 
@@ -23,105 +40,112 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
     useDeviceInfo(true);
   const mode = useAppSelector(state => state.settings.mode);
   const { keyboardShown } = useKeyboard();
-  // const navigation = useNavigation();
+  const dispatch = useAppDispatch();
 
-  console.log(configInstance);
-
-  const { t, i18n } = useTranslation('general');
+  const { t, i18n } = useTranslation(['general', 'common', 'error']);
 
   const [user, setUser] = useState<LoginProps>({
-    email: '',
+    email: 'louistanntt',
     password: '',
     remember_me: false,
   });
   const [show, setShow] = useState<boolean>(false);
-  const [remember, setRemember] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const onLogin = async () => {
     if (!user.email || !user.password) {
-      toast('Hi', 'error');
+      toast(t('validateUser', { ns: 'error' }), 'error');
     } else {
-      const res = await loginAPI(user);
-      console.log(res);
+      let email = user.email;
+      if (process.env.NODE_ENV === 'development') {
+        if (!email.includes('@gmail.com')) {
+          email = `${user.email}@gmail.com`;
+        }
+      }
+      try {
+        setLoading(true);
+        const res = await loginAPI({
+          email: email,
+          password: user.password,
+          remember_me: user.remember_me,
+        });
+        await saveToken(res.data.access_token);
+        await saveRemember(user.remember_me);
+        setLoading(false);
+        navigate('Main');
+      } catch (err: any) {
+        if (err?.response.status === 401) {
+          setLoading(false);
+          setShow(true);
+        }
+
+        // navigate('Activate');
+      }
     }
   };
 
+  const onForgotPassword = () => {
+    navigate('Register', { from: 'forgot', item: user });
+  };
+
   const onChangeLanguage = (newLanguage: string): void => {
-    setLanguage(newLanguage);
     i18n.changeLanguage(newLanguage);
+    dispatch(setLanguage(newLanguage));
   };
 
   return (
-    // <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-    //   <ButtonFill text="A" onPress={() => setShow(!show)} />
-
-    // </View>
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={[
-        styles.container,
-        { paddingTop: statusBarHeight, backgroundColor: mode === 'light' ? '#fff' : '#000' },
-      ]}
-    >
-      <ScrollView contentContainerStyle={{ flex: 1 }}>
+    // <KeyboardView>
+    <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, width: '100%' }}>
         <View style={styles.header}>
           <Text style={{ fontSize: 40, color: colors.primary }}>social</Text>
         </View>
         <View style={styles.footer}>
           <View>
-            <TextField
+            <TextAdvance
+              // label={t('email')}
+              // placeHolder={'example@gmail.com'}
+              placeHolder={t('email')}
               value={user.email}
-              placeHolder="Email"
+              keyboardType="email-address"
+              onChangeText={e => setUser({ ...user, email: e })}
               isFocus
-              onChangeText={e => {
-                setUser({
-                  ...user,
-                  email: e,
-                });
-              }}
+              showIcon
             />
-            <TextField
+            <TextAdvance
+              // label={t('password')}
+              // placeHolder={t('limitPassword')}
+              placeHolder={t('password')}
               value={user.password}
-              placeHolder="Password"
+              onChangeText={e => setUser({ ...user, password: e })}
               isFocus
-              style={{ marginTop: verticalScale(30) }}
-              onChangeText={e => {
-                setUser({
-                  ...user,
-                  password: e,
-                });
-              }}
-              secureTextEntry={true}
+              secureTextEntry
+              showIcon
+              style={{ marginTop: verticalScale(25) }}
             />
-            {/* <TextFieldLabel value="ncc" /> */}
             <View
               style={{
                 flexDirection: 'row',
                 marginTop: scale(20),
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                backgroundColor: 'red',
               }}
             >
               <CheckBox
-                checked={remember}
-                setChecked={() => {
-                  console.log(remember);
-                  setRemember(!remember);
-                }}
-                label="Remember me"
+                checked={user.remember_me}
+                setChecked={() => setUser({ ...user, remember_me: !user.remember_me })}
+                label={t('rememberMe')}
               />
-              <Button
-                style={{ marginTop: verticalScale(20), backgroundColor: 'blue' }}
-                onPress={() => console.log('forget')}
-              >
-                <Text style={styles.text}>{t('forgotPassword')}</Text>
+              <Button onPress={() => onForgotPassword()}>
+                <Text style={mode === 'light' ? lightMode.text : darkMode.text}>
+                  {t('forgotPassword')}
+                </Text>
               </Button>
             </View>
-
             <ButtonFill
               text={t('login').toString()}
               onPress={() => onLogin()}
+              loading={loading}
               style={{ marginTop: verticalScale(45), marginBottom: verticalScale(20) }}
             />
           </View>
@@ -142,29 +166,39 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
               marginBottom: verticalScale(20),
             }}
           >
-            <Text style={styles.text}>{t('dontHaveAccount')}</Text>
-            <Button onPress={() => navigate('SignUp')}>
-              <Text style={{ color: colors.primary }}> {t('signUp')}</Text>
+            <Text style={mode === 'light' ? lightMode.text : darkMode.text}>
+              {t('dontHaveAccount')}
+            </Text>
+            <Button
+              onPress={() => {
+                setUser({
+                  email: '',
+                  password: '',
+                  remember_me: false,
+                });
+                navigate('Register');
+              }}
+            >
+              <Text style={{ color: colors.primary }}> {t('register')}</Text>
             </Button>
           </View>
         </View>
-      </ScrollView>
+      </View>
       <AlertModal
         visible={show}
         type="warning"
-        buttonText="Activate"
-        title={'Account Inactive'}
-        text={'Account has not been activated. Please click on the button to continue.'}
+        buttonText={t('activate', { ns: 'common' })}
+        title={t('accountInactivate')}
+        text={t('activateMessage')}
+        onOkPress={() => navigate('Activate', { email: user.email })}
         setVisible={setShow}
       />
-    </KeyboardAvoidingView>
+    </View>
+    // </KeyboardView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   header: {
     justifyContent: 'center',
     alignItems: 'center',
@@ -175,10 +209,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: moderateScale(20),
     justifyContent: 'space-between',
   },
-  text: {
-    color: colors.textGray,
-  },
-  signUpBtn: {},
   languageBlock: {
     flexDirection: 'row',
     justifyContent: 'center',

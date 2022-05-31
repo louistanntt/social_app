@@ -8,8 +8,12 @@ declare module 'axios' {
   }
 }
 
+// const API_URL = 'http://192.168.1.34:3000';
+const API_URL = 'http://localhost:3000'
+
 const instance = axios.create({
-  baseURL: configInstance.API_URL,
+  // baseURL: configInstance.API_URL,
+  baseURL: API_URL,
   timeout: 30000,
 });
 
@@ -44,39 +48,45 @@ instance.interceptors.request.use((config: AxiosRequestConfig) => {
         // authentication (token related issues)
         case 401: {
           // return Promise.reject(new APIError(err.message, 409));
+          return Promise.reject(error);
         }
   
         // forbidden (permission related issues)
         case 403: {
           // return Promise.reject(new APIError(err.message, 409));
+          return Promise.reject(error.message);
         }
   
         // bad request
         case 400: {
           // return Promise.reject(new APIError(err.message, 400));
+          return Promise.reject(error.message);
         }
   
         // not found
         case 404: {
           // return Promise.reject(new APIError(err.message, 404));
+          return Promise.reject(error.message);
         }
   
         // conflict
         case 409: {
           // return Promise.reject(new APIError(err.message, 409));
+          return Promise.reject(error.message);
         }
   
         // unprocessable
         case 422: {
           // return Promise.reject(new APIError(err.message, 422));
+          return Promise.reject(error.message);
         }
   
         // generic api error (server related) unexpected
         default: {
           // return Promise.reject(new APIError(err.message, 500));
+          return Promise.reject(error);
         }
       }
-    return Promise.reject(error);
   });
   
   

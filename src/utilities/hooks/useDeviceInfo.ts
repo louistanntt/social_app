@@ -59,6 +59,24 @@ const useDeviceInfo = (skipAndroid?: boolean) => {
         return screenInfo.width > screenInfo.height
     }
 
+    const iPhoneWithNotch = () => {
+        return (
+            Platform.OS === 'ios' &&
+            !Platform.isPad &&
+            !Platform.isTVOS &&
+            (screenInfo.height === 780 ||
+            screenInfo.width === 780 ||
+            screenInfo.height === 812 ||
+            screenInfo.width === 812 ||
+            screenInfo.height === 844 ||
+            screenInfo.width === 844 ||
+            screenInfo.height === 896 ||
+            screenInfo.width === 896 ||
+            screenInfo.height === 926 ||
+            screenInfo.width === 926)
+        );
+    }
+
     return {
         windowWidth: screenInfo.width,
         windowHeight: screenInfo.height,
@@ -67,6 +85,7 @@ const useDeviceInfo = (skipAndroid?: boolean) => {
         isLandscape: isLandscape(),
         hasNotch: getStatusBarHeight() > 24,
         deviceName: '',
+        isIPhoneWithNotch: iPhoneWithNotch()
     }
 }
 export default useDeviceInfo;

@@ -1,6 +1,12 @@
 import React, { memo } from 'react';
-import { StyleSheet, View, StyleProp, ViewStyle } from 'react-native';
+import { StyleSheet, View, StyleProp, ViewStyle, Text } from 'react-native';
 import colors from '../config/colors';
+import { Button } from './index';
+import { EnIcon } from './Icons';
+import { goBack } from '../service/navigationService';
+import { scale } from '../utilities/functions/scaling';
+import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 type HeaderProps = {
   leftComponent?: React.ReactNode;
@@ -10,6 +16,7 @@ type HeaderProps = {
   centerContainerStyle?: StyleProp<ViewStyle>;
   rightContainerStyle?: StyleProp<ViewStyle>;
   style?: StyleProp<ViewStyle>;
+  noBorder?: boolean;
 };
 
 const Header = (props: HeaderProps) => {
@@ -21,9 +28,18 @@ const Header = (props: HeaderProps) => {
     centerContainerStyle,
     rightContainerStyle,
     style,
+    noBorder = false,
   } = props;
+
+  const { t } = useTranslation(['general', 'common']);
   return (
-    <View style={[styles.header, style]}>
+    <View
+      style={[
+        styles.header,
+        style,
+        !noBorder && { borderBottomWidth: 3, borderBottomColor: colors.white },
+      ]}
+    >
       <View
         style={[
           styles.container,
@@ -31,7 +47,26 @@ const Header = (props: HeaderProps) => {
           leftContainerStyle,
         ]}
       >
-        {leftComponent && leftComponent}
+        {leftComponent ? (
+          leftComponent
+        ) : (
+          <Button onPress={() => goBack()}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+                paddingHorizontal: scale(5),
+                // backgroundColor: 'red',
+              }}
+            >
+              <EnIcon name="chevron-thin-left" size={20} />
+              <Text style={{ fontSize: 16, marginLeft: scale(5) }}>
+                {t('goBack', { ns: 'common' })}
+              </Text>
+            </View>
+          </Button>
+        )}
       </View>
       <View
         style={[
@@ -60,8 +95,6 @@ const styles = StyleSheet.create({
     zIndex: 10,
     height: 50,
     backgroundColor: 'transparent',
-    borderBottomWidth: 3,
-    borderBottomColor: colors.test,
     flexDirection: 'row',
     alignItems: 'center',
   },

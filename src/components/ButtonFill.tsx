@@ -8,6 +8,7 @@ import {
   View,
   StyleProp,
   TextStyle,
+  ViewStyle,
   GestureResponderEvent,
   StyleSheet,
 } from 'react-native';
@@ -16,14 +17,15 @@ import colors from '../config/colors';
 
 type ButtonFillProps = {
   text?: string;
-  style?: StyleProp<TextStyle>;
+  style?: StyleProp<ViewStyle>;
   onPress: (e: GestureResponderEvent) => void;
   loading?: boolean;
   disabled?: boolean;
+  textStyle?: StyleProp<TextStyle>;
 };
 
 const ButtonFill = (props: ButtonFillProps) => {
-  const { text, style, onPress, loading, disabled } = props;
+  const { text, style, onPress, loading, disabled, textStyle } = props;
 
   return (
     <TouchableNativeFeedback disabled={disabled} onPress={onPress}>
@@ -37,7 +39,7 @@ const ButtonFill = (props: ButtonFillProps) => {
         {loading ? (
           <ActivityIndicator color={colors.white} size={'large'} />
         ) : (
-          <Text style={styles.text}>{text}</Text>
+          <Text style={[styles.text, textStyle]}>{text}</Text>
         )}
       </View>
     </TouchableNativeFeedback>

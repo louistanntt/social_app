@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, memo } from 'react';
 import { ScrollView, Dimensions, Keyboard, Platform } from 'react-native';
 import { scale, verticalScale, moderateScale } from '../utilities/functions/scaling';
 import Animated, { withSpring, useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
@@ -15,7 +15,7 @@ const KeyboardView = (props: KeyboardViewProps) => {
   const scaleAnim = useSharedValue(0);
   const animatedStyles = useAnimatedStyle(() => {
     return {
-      transform: [{ translateY: -scaleAnim.value }],
+      transform: [{ translateY: - scaleAnim.value }],
     };
   });
   useEffect(() => {
@@ -34,8 +34,8 @@ const KeyboardView = (props: KeyboardViewProps) => {
         ? Keyboard.addListener('keyboardWillHide', onKeyboardHide)
         : Keyboard.addListener('keyboardDidHide', onKeyboardHide);
     return () => {
-      Keyboard.removeSubscription(eventShow);
-      Keyboard.removeSubscription(eventHide);
+      eventShow.remove();
+      eventHide.remove();
     };
   }, []);
   return (
@@ -43,7 +43,7 @@ const KeyboardView = (props: KeyboardViewProps) => {
       keyboardShouldPersistTaps="handled"
       contentContainerStyle={{
         width: windowWidth,
-        paddingHorizontal: scale(10),
+        // paddingHorizontal: scale(10),
         height: isHeader ? windowHeight - verticalScale(80) : windowHeight,
       }}
       scrollEnabled={false}
@@ -63,4 +63,4 @@ const KeyboardView = (props: KeyboardViewProps) => {
     </ScrollView>
   );
 };
-export default KeyboardView;
+export default memo(KeyboardView);

@@ -1,6 +1,5 @@
 import React from 'react';
 import { ColorValue } from 'react-native';
-import { scale, moderateScale, verticalScale } from '../utilities/scaling';
 import Ant from 'react-native-vector-icons/AntDesign';
 import En from 'react-native-vector-icons/Entypo';
 import Fe from 'react-native-vector-icons/Feather';

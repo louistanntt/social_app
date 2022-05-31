@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import configInstance from '../config/environment';
+import configInstance from '../../config/environment';
 
 export const saveToken = async(token: string) => {
     configInstance.accessToken = token;
@@ -9,4 +9,8 @@ export const saveToken = async(token: string) => {
 export const removeToken = async () => {
     configInstance.accessToken = '';
     await AsyncStorage.removeItem('token')
+}
+
+export const saveRemember = async(value: boolean) => {
+    await AsyncStorage.setItem('remember', JSON.stringify(value));
 }

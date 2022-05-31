@@ -1,4 +1,7 @@
 {
-  "weather": "Weather",
-  "settings": "Settings"
+  "next": "Next",
+  "goBack": "Go back",
+  "empty": "Empty",
+  "activate": "Activate",
+  "submit": "Submit"
 }

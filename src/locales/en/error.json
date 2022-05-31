@@ -1,4 +1,7 @@
 {
-  "humidity": "Humidity",
-  "today": "Today"
+  "limitPassword": "At least 5 character",
+  "validateUser": "All field are required",
+  "passwordNotMatch": "Password does not match",
+  "invalidEmail": "Invalid email",
+  "invalidCode": "Invalid activate code"
 }
