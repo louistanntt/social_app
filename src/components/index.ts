@@ -12,7 +12,5 @@ import Header from './Header';
 import DatePicker from './DatePicker';
 import DateTimePicker from './DateTimePicker';
 import Modalize from './Modalize';
-import PieChart from './PieChart'
-import PieTesting from './PieTesting'
 
-export  { AlertModal, BottomSheet, Button, ButtonFill, CheckBox, KeyboardView, TextField, ToastCustom, Header, TextAdvance, Toast, DatePicker, DateTimePicker, Modalize, PieChart, PieTesting }
+export  { AlertModal, BottomSheet, Button, ButtonFill, CheckBox, KeyboardView, TextField, ToastCustom, Header, TextAdvance, Toast, DatePicker, DateTimePicker, Modalize}
