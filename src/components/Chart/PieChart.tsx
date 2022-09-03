@@ -1,8 +1,8 @@
 import React, { memo, useState } from 'react'
-import { View, Platform, StyleProp, ViewStyle } from 'react-native'
+import { View, Platform, StyleProp, ViewStyle, TextInput, StyleSheet } from 'react-native'
 import PropTypes from 'prop-types'
 import * as shape from 'd3-shape'
-import Svg, { G, Path } from 'react-native-svg'
+import Svg, { Circle, G, Path, } from 'react-native-svg'
 
 interface InfoProps  {
     width: number, 
@@ -37,22 +37,23 @@ const PieChart = (props: any) => {
         animate,
         animationDuration,
         style,
-        sort,
-        valueAccessor,
+        sort = (a: any, b: any) => b.value - a.value,
+        valueAccessor = ({ item }: any) => item.value,
         children,
         startAngle = 0,
         endAngle = Math.PI * 2,
     } = props
 
+
     const [info, setInfo] = useState<InfoProps>({
-        height: 100,
-        width: 100
+        height: 200,
+        width: 200
     }) 
 
     const calculateRadius = (arg: any | string, max: number, defaultVal: number) => {
         if (typeof arg === 'string') {
-            return 1
-            // return (arg.split('%')[0] / 100) * max
+            let num: number = parseInt(arg.split('%')[0])
+            return (num / 100) * max
         } else if (arg) {
             return arg
         } 
@@ -73,16 +74,17 @@ const PieChart = (props: any) => {
         console.error("don't pass negative numbers to pie-chart, it makes no sense!")
     }
 
+    
     const outerRadiusInner = calculateRadius(outerRadius, maxRadius, maxRadius)
     const innerRadiusInner = calculateRadius(innerRadius, maxRadius, 0)
     const labelRadiusInner = calculateRadius(labelRadius, maxRadius, outerRadius)
-
+    
     if (outerRadiusInner > 0 && innerRadiusInner >= outerRadiusInner) {
         console.warn('innerRadius is equal to or greater than outerRadius')
     }
 
     const arcs = data.map((item: any) => {
-        const arc = shape
+        const arc: any = shape
             .arc()
             .outerRadius(outerRadiusInner)
             .innerRadius(innerRadiusInner)
@@ -92,7 +94,8 @@ const PieChart = (props: any) => {
             Object.entries(item.arc).forEach(([key, value]) => {
                 if (typeof arc[key] === 'function') {
                     if (typeof value === 'string') {
-                        arc[key]((value.split('%')[0] / 100) * outerRadiusInner)
+                        let number: number | any = value.split('%')[0]
+                        arc[key]((number/ 100) * outerRadiusInner)
                     } else {
                         arc[key](value)
                     }
@@ -133,16 +136,16 @@ const PieChart = (props: any) => {
         slices,
     }
 
-    console.log(info)
-
     return (
-        <View pointerEvents={'box-none'} style={style}>
+        <View pointerEvents={'box-none'} style={[{height: 200, width: 200},style]}>
             <View pointerEvents={'box-none'} style={{ flex: 1 }} onLayout={({nativeEvent}) => {
                 const { height, width } = nativeEvent.layout
+                console.log(height, width)
                 setInfo({height, width})
             }}>
                 {info.height > 0 && info.width > 0 && (
-                    <Svg pointerEvents={Platform.OS === 'android' ? 'box-none' : undefined} style={{  height: info.height, width: info.width }}>
+                   <>
+                     <Svg pointerEvents={Platform.OS === 'android' ? 'box-none' : undefined} style={{  height: info.height, width: info.width }}>
                         {/* center the progress circle*/}
                         <G x={info.width / 2} y={info.height / 2}>
                             {React.Children.map(children, (child) => {
@@ -172,41 +175,64 @@ const PieChart = (props: any) => {
                             })}
                         </G>
                     </Svg>
+                    <View  style={[ StyleSheet.absoluteFillObject, {
+                            justifyContent: 'center', 
+                            alignItems: 'center', 
+                            // marginLeft: -5, 
+                            // marginBottom: -5,
+                            backgroundColor: 'rgba(0,0,0,0.3)',
+                        } ]} >
+                    <TextInput 
+                        editable={false} 
+                       style={{
+                        fontSize: 14, 
+                            color: 'black', 
+                            fontWeight: '500', 
+                            textAlign: 'center',
+                            // justifyContent: 'center',
+                            // alignItems: 'center',
+                            maxWidth: 100,
+                            minHeight: 50
+                       }}
+                        value={`10000 cong viec`} 
+                    />
+                    </View>
+                   </>
                 )}
             </View>
         </View>
     )
 }
 
-PieChart.propTypes = {
-    data: PropTypes.arrayOf(
-        PropTypes.shape({
-            svg: PropTypes.object,
-            key: PropTypes.any.isRequired,
-            value: PropTypes.number,
-            arc: PropTypes.object,
-        })
-    ).isRequired,
-    innerRadius: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-    outerRadius: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-    labelRadius: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-    padAngle: PropTypes.number,
-    animate: PropTypes.bool,
-    animationDuration: PropTypes.number,
-    style: PropTypes.any,
-    sort: PropTypes.func,
-    valueAccessor: PropTypes.func,
-}
+// PieChart.propTypes = {
+//     data: PropTypes.arrayOf(
+//         PropTypes.shape({
+//             svg: PropTypes.object,
+//             key: PropTypes.any.isRequired,
+//             value: PropTypes.number,
+//             arc: PropTypes.object,
+//         })
+//     ).isRequired,
+//     innerRadius: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+//     outerRadius: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+//     labelRadius: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+//     padAngle: PropTypes.number,
+//     animate: PropTypes.bool,
+//     animationDuration: PropTypes.number,
+//     style: PropTypes.any,
+//     sort: PropTypes.func,
+//     valueAccessor: PropTypes.func,
+// }
 
-PieChart.defaultProps = {
-    width: 100,
-    height: 100,
-    padAngle: 0.05,
-    startAngle: 0,
-    endAngle: Math.PI * 2,
-    valueAccessor: ({ item }: any) => item.value,
-    innerRadius: '50%',
-    sort: (a: any, b: any) => b.value - a.value,
-}
+// PieChart.defaultProps = {
+//     width: 200,
+//     height: 200,
+//     padAngle: 0.05,
+//     startAngle: 0,
+//     endAngle: Math.PI * 2,
+//     valueAccessor: ({ item }: any) => item.value,
+//     innerRadius: '50%',
+//     sort: (a: any, b: any) => b.value - a.value,
+// }
 
 export default memo(PieChart)
